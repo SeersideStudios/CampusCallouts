@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("[CC] Trespasser", CalloutProbability.Medium, "A trespasser has been reported on the track field at the ULSA Campus. Investigate the situation.", "Code 2", "ULSAPD")]
+    [CalloutInterface("[CC] Trespasser", CalloutProbability.Medium, "")]
     public class Trespasser : Callout
     {
         //Private References

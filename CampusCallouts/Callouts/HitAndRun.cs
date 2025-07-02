@@ -10,7 +10,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("[CC] Hit and Run", CalloutProbability.Medium, "A Student was hit by a car exiting the parking lot at the ULSA Campus.", "Code 2", "ULSAPD")]
+    [CalloutInfo("[CC] Hit and Run", CalloutProbability.Medium)]
     public class HitAndRun : Callout
     {
         //Private References
