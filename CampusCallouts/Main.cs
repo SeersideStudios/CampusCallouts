@@ -110,6 +110,7 @@ namespace CampusCallouts
 
         private static void RegisterCallouts()
         {
+            Game.LogTrivial("====================CAMPUSCALLOUTS CALLOUTS REGISTRATION====================");
             //CalloutInterface integration
             if (Functions.GetAllUserPlugins().ToList().Any(a => a != null && a.FullName.Contains("CalloutInterface")) == true)
             {
@@ -132,6 +133,8 @@ namespace CampusCallouts
             if (Settings.WeaponViolation) { Functions.RegisterCallout(typeof(Callouts.WeaponViolation)); }
             if (Settings.HitAndRun) { Functions.RegisterCallout(typeof(Callouts.HitAndRun)); }
             if (Settings.Trespasser) { Functions.RegisterCallout(typeof(Callouts.Trespasser)); Game.LogTrivial("CampusCallouts - Trespasser Loaded"); }
+
+            Game.LogTrivial("====================CAMPUSCALLOUTS CALLOUTS REGISTRATION====================");
             
         }
     }
