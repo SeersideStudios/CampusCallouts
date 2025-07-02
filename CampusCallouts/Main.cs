@@ -1,10 +1,9 @@
-﻿using CampusCallouts.Callouts;
-using LSPD_First_Response.Mod.API;
+﻿using LSPD_First_Response.Mod.API;
 using Rage;
 using System;
 using System.Linq;
 
-[assembly: Rage.Attributes.Plugin("CampusCallouts", Description = "University Callouts ReMake for LSPDFR 0.4.9", Author = "SeersideStudios")]
+// [assembly: Rage.Attributes.Plugin("CampusCallouts", Description = "University Callouts ReMake for LSPDFR 0.4.9", Author = "SeersideStudios")] Is this really needed?
 namespace CampusCallouts
 {
     public class Main : Plugin
@@ -20,17 +19,17 @@ namespace CampusCallouts
             {
                 Settings.LoadSettings();
                 Functions.OnOnDutyStateChanged += OnOnDutyStateChangedHandler;
-                 
+
             }
             catch (Exception ex)
             {
-                Game.LogTrivial("CampusCallouts [LOG]: An error occurred while initializing the plugin: " + ex.Message);
+                Game.LogTrivial("CampusCallouts: An error occurred while initializing the plugin: " + ex.Message);
             }
         }
 
         public override void Finally()
         {
-            Game.LogTrivial("Campus Callouts has been cleaned up.");
+            Game.LogTrivial("CampusCallouts: Campus Callouts has been cleaned up.");
         }
 
         private static void OnOnDutyStateChangedHandler(bool OnDuty)
@@ -63,14 +62,14 @@ namespace CampusCallouts
             }
 
             //Register Callouts Here
-            if (Settings.UnderageDrinking) { Functions.RegisterCallout(typeof(UnderageDrinking)); }
-            if (Settings.StudentsFighting) { Functions.RegisterCallout(typeof(StudentsFighting)); }
-            if (Settings.NoiseComplaint) { Functions.RegisterCallout(typeof(NoiseComplaint)); }
-            if (Settings.StudentEscort) { Functions.RegisterCallout(typeof(StudentEscort)); }
-            if (Settings.Stalking) { Functions.RegisterCallout(typeof(StalkingReport)); }
-            if (Settings.WeaponViolation) { Functions.RegisterCallout(typeof(WeaponViolation)); }
-            if (Settings.HitAndRun) { Functions.RegisterCallout(typeof(HitAndRun)); }
-            if (Settings.Trespasser) { Functions.RegisterCallout(typeof(Trespasser)); Game.LogTrivial("CampusCallouts - Trespasser Loaded"); }
+            if (Settings.UnderageDrinking) { Functions.RegisterCallout(typeof(Callouts.UnderageDrinking)); }
+            if (Settings.StudentsFighting) { Functions.RegisterCallout(typeof(Callouts.StudentsFighting)); }
+            if (Settings.NoiseComplaint) { Functions.RegisterCallout(typeof(Callouts.NoiseComplaint)); }
+            if (Settings.StudentEscort) { Functions.RegisterCallout(typeof(Callouts.StudentEscort)); }
+            if (Settings.Stalking) { Functions.RegisterCallout(typeof(Callouts.StalkingReport)); }
+            if (Settings.WeaponViolation) { Functions.RegisterCallout(typeof(Callouts.WeaponViolation)); }
+            if (Settings.HitAndRun) { Functions.RegisterCallout(typeof(Callouts.HitAndRun)); }
+            if (Settings.Trespasser) { Functions.RegisterCallout(typeof(Callouts.Trespasser)); Game.LogTrivial("CampusCallouts - Trespasser Loaded"); }
             
         }
     }
