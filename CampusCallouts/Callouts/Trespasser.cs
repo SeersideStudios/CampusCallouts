@@ -38,7 +38,7 @@ namespace CampusCallouts.Callouts
             //LSPDFR Handling
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
-            CalloutInterfaceAPI.Functions.SendMessage(this, "A suspect is said to have been trespassing at the Track field at ULSA.");
+            if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "A suspect is said to have been trespassing at the Track field at ULSA.");
             CalloutMessage = "Trespasser";
             CalloutAdvisory = "A suspect is said to have been trespassing at the Track field at ULSA.";
             FriendlyName = "trespasser";
@@ -70,7 +70,7 @@ namespace CampusCallouts.Callouts
             Game.DisplayHelp("Security at the University has reported a Trespasser at the Track on campus. Please investigate.");
 
             //Callout Interface
-            CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser reported at the ULSA Campus");
+            if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser reported at the ULSA Campus");
 
             //Make ped go to their destination
             Ped.Tasks.Wander();
@@ -122,7 +122,7 @@ namespace CampusCallouts.Callouts
                     LSPD_First_Response.Mod.API.Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
                     LSPD_First_Response.Mod.API.Functions.SetPursuitCopsCanJoin(Pursuit, true);
                     Game.DisplayNotification("The suspect is running away!");
-                    CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser reported running away");
+                    if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser reported running away");
                     pursuitCreated = true;
                     GatheredInfo = true;
                 }
@@ -140,7 +140,7 @@ namespace CampusCallouts.Callouts
                     Game.DisplaySubtitle("~y~Trespasser: ~w~Understood, I’ll head out now.");
                     GameFiber.Sleep(3500);
 
-                    CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser handled, and dismissed.");
+                    if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser handled, and dismissed.");
 
                     GatheredInfo = true;
                     End();

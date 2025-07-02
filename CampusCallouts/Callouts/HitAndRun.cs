@@ -192,7 +192,7 @@ namespace CampusCallouts.Callouts
                 GameFiber.Sleep(3500);
 
                 //Callout Interface
-                CalloutInterfaceAPI.Functions.SendMessage(this, "Student gave a vehicle description:\nModel: " + model + "\nPlate: " + plate);
+                if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Student gave a vehicle description:\nModel: " + model + "\nPlate: " + plate);
 
 
                 //Create the Blip for the suspect
