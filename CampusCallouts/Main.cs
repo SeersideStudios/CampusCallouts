@@ -123,16 +123,20 @@ namespace CampusCallouts
                 CalloutInterface = false;
             }
 
-            //Register Callouts Here
-            Game.LogTrivial("Started Registering Callouts.");
-            if (Settings.UnderageDrinking || !Settings.ini.Exists()) { Functions.RegisterCallout(typeof(Callouts.UnderageDrinking)); }
-            if (Settings.StudentsFighting) { Functions.RegisterCallout(typeof(Callouts.StudentsFighting)); }
-            if (Settings.NoiseComplaint) { Functions.RegisterCallout(typeof(Callouts.NoiseComplaint)); }
-            if (Settings.StudentEscort) { Functions.RegisterCallout(typeof(Callouts.StudentEscort)); }
-            if (Settings.Stalking) { Functions.RegisterCallout(typeof(Callouts.StalkingReport)); }
-            if (Settings.WeaponViolation) { Functions.RegisterCallout(typeof(Callouts.WeaponViolation)); }
-            if (Settings.HitAndRun) { Functions.RegisterCallout(typeof(Callouts.HitAndRun)); }
-            if (Settings.Trespasser) { Functions.RegisterCallout(typeof(Callouts.Trespasser)); Game.LogTrivial("CampusCallouts - Trespasser Loaded"); }
+            //Check for INI file
+            if (Settings.ini.Exists()) { Game.LogTrivial("CampusCallout.ini is installed."); }
+            else { Game.LogTrivial("CampusCallouts.ini is NOT installed"); }
+
+                //Register Callouts Here
+                Game.LogTrivial("Started Registering Callouts.");
+            if (Settings.UnderageDrinking || !Settings.ini.Exists())  Functions.RegisterCallout(typeof(Callouts.UnderageDrinking)); 
+            if (Settings.StudentsFighting || !Settings.ini.Exists())  Functions.RegisterCallout(typeof(Callouts.StudentsFighting)); 
+            if (Settings.NoiseComplaint || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.NoiseComplaint));
+            if (Settings.StudentEscort || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.StudentEscort));
+            if (Settings.Stalking || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.StalkingReport));
+            if (Settings.WeaponViolation || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.WeaponViolation));
+            if (Settings.HitAndRun || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.HitAndRun));        
+            if (Settings.Trespasser || !Settings.ini.Exists()) { Functions.RegisterCallout(typeof(Callouts.Trespasser)); Game.LogTrivial("CampusCallouts - Trespasser Loaded"); }
 
             Game.LogTrivial("====================CAMPUSCALLOUTS CALLOUTS REGISTRATION====================");
             
