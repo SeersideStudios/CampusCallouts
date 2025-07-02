@@ -258,15 +258,9 @@ namespace CampusCallouts.Callouts
             }
 
             //Check conditions to end callout
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(System.Windows.Forms.Keys.End))
             {
                 End();
-            }
-
-            if (Game.IsKeyDown(System.Windows.Forms.Keys.End))
-            {
-                GameFiber.Sleep(3000);
-                this.End();
             }
 
         }

@@ -147,16 +147,9 @@ namespace CampusCallouts.Callouts
                 }
             }
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Game.IsKeyDown(System.Windows.Forms.Keys.End))
             {
-                Game.DisplayNotification("~g~Suspect has been apprehended.");
                 End();
-            }
-
-            if (Game.IsKeyDown(System.Windows.Forms.Keys.End))
-            {
-                GameFiber.Sleep(3000);
-                this.End();
             }
         }
 
