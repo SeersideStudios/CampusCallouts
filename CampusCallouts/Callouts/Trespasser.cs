@@ -153,6 +153,11 @@ namespace CampusCallouts.Callouts
                 End();
             }
 
+            if (Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            {
+                GameFiber.Sleep(3000);
+                this.End();
+            }
         }
 
         public override void End()
