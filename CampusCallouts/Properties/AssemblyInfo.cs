@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("CampusCallouts")]
 [assembly: AssemblyDescription("University Callouts ReMake for LSPDFR")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Seerside Studios")]
 [assembly: AssemblyProduct("CampusCallouts")]
 [assembly: AssemblyCopyright("Copyright ©  2025 Seerside Studios")]
 [assembly: AssemblyTrademark("")]

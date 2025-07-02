@@ -37,8 +37,6 @@ namespace CampusCallouts
 
         private static void OnOnDutyStateChangedHandler(bool OnDuty)
         {
-            if (OnDuty)
-            {
                 if (OnDuty)
                 {
                     int num = (int)Game.DisplayNotification("3dtextures", "mpgroundlogo_cops", "Campus Callouts", "~y~v." + curVersion + " ~b~by Seerside Studios", " ~g~Loaded Successfully. ~b~Have a good day at School!");
@@ -105,7 +103,6 @@ namespace CampusCallouts
                     });
                     RegisterCallouts();
                 }
-            }
         }
 
         private static void RegisterCallouts()
