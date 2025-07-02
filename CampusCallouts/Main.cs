@@ -5,7 +5,7 @@ using System.Net;
 using System.Threading;
 using System.Linq;
 
-// [assembly: Rage.Attributes.Plugin("CampusCallouts", Description = "University Callouts ReMake for LSPDFR 0.4.9", Author = "SeersideStudios")] Is this really needed?
+// [assembly: Rage.Attributes.Plugin("CampusCallouts", Description = "University Callouts ReMake for LSPDFR 0.4.9", Author = "Seerside Studios")] Is this really needed?
 namespace CampusCallouts
 {
     public class Main : Plugin
@@ -37,6 +37,7 @@ namespace CampusCallouts
 
         private static void OnOnDutyStateChangedHandler(bool OnDuty)
         {
+            // Huge Thanks to Yob1n for this section of the code
                 if (OnDuty)
                 {
                     int num = (int)Game.DisplayNotification("3dtextures", "mpgroundlogo_cops", "Campus Callouts", "~y~v." + curVersion + " ~b~by Seerside Studios", " ~g~Loaded Successfully. ~b~Have a good day at School!");
