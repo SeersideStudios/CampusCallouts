@@ -23,6 +23,6 @@ using System.Runtime.InteropServices;
 [assembly: Guid("7df1c646-ee75-46fe-8cac-c1398ce4f50d")]
 
 // 1.0.0 is a pre-release dev version
-// 1.5.0 is the initial release
+// 1.1.0 is the initial release
 [assembly: AssemblyVersion("1.0.0")]
 [assembly: AssemblyFileVersion("1.0.0")]
