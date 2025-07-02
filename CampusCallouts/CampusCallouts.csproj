@@ -59,9 +59,6 @@
     <Reference Include="LSPD First Response">
       <HintPath>..\..\..\..\Desktop\GTA\LSPDFR Created Mods\References\LSPD First Response.dll</HintPath>
     </Reference>
-    <Reference Include="RAGENativeUI">
-      <HintPath>..\..\..\..\..\..\Program Files\Epic Games\GTAV\RAGENativeUI.dll</HintPath>
-    </Reference>
     <Reference Include="RagePluginHookSDK">
       <HintPath>..\..\..\..\Desktop\GTA\LSPDFR Created Mods\References\RagePluginHookSDK.dll</HintPath>
     </Reference>
