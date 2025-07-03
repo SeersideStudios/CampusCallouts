@@ -75,7 +75,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Callouts\TestCallout.cs" />
     <Compile Include="Callouts\Fight.cs" />
     <Compile Include="Callouts\HitAndRun.cs" />
     <Compile Include="Callouts\NoiseComplaint.cs" />
