@@ -135,7 +135,6 @@ namespace CampusCallouts
             if (Settings.WeaponViolation || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.WeaponViolation));
             if (Settings.HitAndRun || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.HitAndRun));        
             if (Settings.Trespasser || !Settings.ini.Exists()) { Functions.RegisterCallout(typeof(Callouts.Trespasser)); Game.LogTrivial("CampusCallouts - Trespasser Loaded"); }
-            if (Settings.TestCallout || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.TestCallout));
             Game.LogTrivial("====================CAMPUSCALLOUTS CALLOUTS REGISTRATION====================");
             
         }
