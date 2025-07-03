@@ -127,22 +127,15 @@ namespace CampusCallouts
 
                 //Register Callouts Here
                 Game.LogTrivial("Started Registering Callouts.");
-            //if (Settings.UnderageDrinking || !Settings.ini.Exists())  Functions.RegisterCallout(typeof(Callouts.UnderageDrinking)); 
-            //if (Settings.StudentsFighting || !Settings.ini.Exists())  Functions.RegisterCallout(typeof(Callouts.StudentsFighting)); 
-            //if (Settings.NoiseComplaint || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.NoiseComplaint));
-            //if (Settings.StudentEscort || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.StudentEscort));
-            //if (Settings.Stalking || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.StalkingReport));
-            //if (Settings.WeaponViolation || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.WeaponViolation));
-            //if (Settings.HitAndRun || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.HitAndRun));        
-            //if (Settings.Trespasser || !Settings.ini.Exists()) { Functions.RegisterCallout(typeof(Callouts.Trespasser)); Game.LogTrivial("CampusCallouts - Trespasser Loaded"); }
-            Functions.RegisterCallout(typeof(Callouts.UnderageDrinking));
-            Functions.RegisterCallout(typeof(Callouts.StudentsFighting));
-            Functions.RegisterCallout(typeof(Callouts.NoiseComplaint));
-            Functions.RegisterCallout(typeof(Callouts.StudentEscort));
-            Functions.RegisterCallout(typeof(Callouts.StalkingReport));
-            Functions.RegisterCallout(typeof(Callouts.WeaponViolation));
-            Functions.RegisterCallout(typeof(Callouts.HitAndRun));
-            Functions.RegisterCallout(typeof(Callouts.Trespasser));
+            if (Settings.UnderageDrinking || !Settings.ini.Exists())  Functions.RegisterCallout(typeof(Callouts.UnderageDrinking)); 
+            if (Settings.StudentsFighting || !Settings.ini.Exists())  Functions.RegisterCallout(typeof(Callouts.StudentsFighting)); 
+            if (Settings.NoiseComplaint || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.NoiseComplaint));
+            if (Settings.StudentEscort || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.StudentEscort));
+            if (Settings.Stalking || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.StalkingReport));
+            if (Settings.WeaponViolation || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.WeaponViolation));
+            if (Settings.HitAndRun || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.HitAndRun));        
+            if (Settings.Trespasser || !Settings.ini.Exists()) { Functions.RegisterCallout(typeof(Callouts.Trespasser)); Game.LogTrivial("CampusCallouts - Trespasser Loaded"); }
+            if (Settings.TestCallout || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.TestCallout));
             Game.LogTrivial("====================CAMPUSCALLOUTS CALLOUTS REGISTRATION====================");
             
         }
