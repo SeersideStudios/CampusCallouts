@@ -11,7 +11,6 @@ namespace CampusCallouts.Callouts
     {
         //Private References
         private Vector3 DrivewayLocation;
-        private float DrivewayHeading;
 
         private Vector3 PedSpawn;
         private Vector3 PedSpawn2;
@@ -31,18 +30,12 @@ namespace CampusCallouts.Callouts
         private Ped Ped5;
 
         private Blip DrivewayBlip;
-        private Blip PedBlip1;
-        private Blip PedBlip2;
-        private Blip PedBlip3;
-        private Blip PedBlip4;
-        private Blip PedBlip5;
 
         private bool OnScene = false;
 
         public override bool OnBeforeCalloutDisplayed()
         {
             DrivewayLocation = new Vector3(-1750.335f, 365.4604f, 89.23333f);
-            DrivewayHeading = 295.8035f;
 
             PedSpawn = new Vector3(-1721.035f, 366.1222f, 89.77831f);
             PedHeading = 275.8509f;
@@ -128,20 +121,6 @@ namespace CampusCallouts.Callouts
             //First Line
             base.OnCalloutNotAccepted();
             if (Ped1.Exists()) { Ped1.Dismiss(); }
-            if (PedBlip1.Exists()) { PedBlip1.Delete(); }
-            
-            if (Ped2.Exists()) { Ped2.Dismiss(); }
-            if (PedBlip2.Exists()) { PedBlip2.Delete(); }
-            
-            if (Ped3.Exists()) { Ped3.Dismiss(); }
-            if (PedBlip3.Exists()) { PedBlip3.Delete(); }
-            
-            if (Ped4.Exists()) { Ped4.Dismiss(); }
-            if (PedBlip4.Exists()) { PedBlip4.Delete(); }
-            
-            if (Ped5.Exists()) { Ped5.Dismiss(); }
-            if (PedBlip5.Exists()) { PedBlip5.Delete(); }
-
             if (DrivewayBlip.Exists()) { DrivewayBlip.Delete(); }
         }
 
@@ -171,20 +150,6 @@ namespace CampusCallouts.Callouts
             //First Line
             base.End();
             if (Ped1.Exists()) { Ped1.Dismiss(); }
-            if (PedBlip1.Exists()) { PedBlip1.Delete(); }
-
-            if (Ped2.Exists()) { Ped2.Dismiss(); }
-            if (PedBlip2.Exists()) { PedBlip2.Delete(); }
-
-            if (Ped3.Exists()) { Ped3.Dismiss(); }
-            if (PedBlip3.Exists()) { PedBlip3.Delete(); }
-
-            if (Ped4.Exists()) { Ped4.Dismiss(); }
-            if (PedBlip4.Exists()) { PedBlip4.Delete(); }
-
-            if (Ped5.Exists()) { Ped5.Dismiss(); }
-            if (PedBlip5.Exists()) { PedBlip5.Delete(); }
-
             if (DrivewayBlip.Exists()) { DrivewayBlip.Delete(); }
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
             CalloutInterfaceAPI.Functions.SendMessage(this, "Noise complaint resolved. Units are Code 4.");

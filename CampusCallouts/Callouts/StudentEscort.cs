@@ -23,7 +23,6 @@ namespace CampusCallouts.Callouts
         private Vehicle Car;
 
         private bool OnScene = false;
-        private bool AtLocation = false;
 
         public override bool OnBeforeCalloutDisplayed()
         {
