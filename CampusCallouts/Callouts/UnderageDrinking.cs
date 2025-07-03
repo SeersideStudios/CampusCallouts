@@ -9,7 +9,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Underage Drinking", CalloutProbability.Low, "A report of a student potentially drinking underage at a party.", "Code 2", "University or Local PD")]
+    [CalloutInterface("Underage Drinking", CalloutProbability.Low, "A report of a student potentially drinking underage at a party.", "Code 2", "ULSAPD")]
     public class UnderageDrinking : Callout
     {
         //Private References
@@ -33,9 +33,6 @@ namespace CampusCallouts.Callouts
             // LSPDFR
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
-
-            //Create friendly name
-            FriendlyName = "underage drinking";
 
             //Last Line
             return base.OnBeforeCalloutDisplayed();

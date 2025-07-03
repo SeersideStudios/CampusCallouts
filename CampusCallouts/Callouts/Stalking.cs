@@ -6,7 +6,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Stalking Report", CalloutProbability.Low, "Student reported being followed by an unknown individual on campus.", "Code 2", "University and Local PD")]
+    [CalloutInterface("Stalking Report", CalloutProbability.Low, "Student reported being followed by an unknown individual on campus.", "Code 2", "ULSAPD")]
 
     public class StalkingReport : Callout
     {
@@ -35,9 +35,6 @@ namespace CampusCallouts.Callouts
 
             //Create Callout message
             CalloutMessage = "Reports of a Stalking";
-
-            //Create friendly name
-            FriendlyName = "reports of a stalking";
 
             //Last Line
             return base.OnBeforeCalloutDisplayed();

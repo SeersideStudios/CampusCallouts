@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("[CC] Trespasser", CalloutProbability.Medium, "")]
+    [CalloutInterface("Trespasser", CalloutProbability.Medium, "A suspect is reported to be trespassing at the ULSA campus track field.", "Code 2", "ULSAPD")]
     public class Trespasser : Callout
     {
         //Private References
@@ -41,7 +41,6 @@ namespace CampusCallouts.Callouts
             if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "A suspect is said to have been trespassing at the Track field at ULSA.");
             CalloutMessage = "Trespasser";
             CalloutAdvisory = "A suspect is said to have been trespassing at the Track field at ULSA.";
-            FriendlyName = "trespasser";
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_TRESPASSING_01 IN_OR_ON_POSITION", CalloutPosition);
 
             return base.OnBeforeCalloutDisplayed();

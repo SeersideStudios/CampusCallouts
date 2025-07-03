@@ -6,7 +6,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Noise Complaint", CalloutProbability.Medium, "Neighbors report loud party activity near the dorm driveways.", "Code 1", "University or Local PD")]
+    [CalloutInterface("Noise Complaint", CalloutProbability.Medium, "Neighbors report loud party activity near the dorm driveways.", "Code 1", "ULSAPD")]
     public class NoiseComplaint : Callout
     {
         //Private References
@@ -68,9 +68,6 @@ namespace CampusCallouts.Callouts
 
             //Create Callout message
             CalloutMessage = "Noise Complaint";
-
-            //Create friendly name
-            FriendlyName = "noise complaint";
 
             //Last Line
             return base.OnBeforeCalloutDisplayed();

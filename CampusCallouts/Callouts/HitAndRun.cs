@@ -10,7 +10,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInfo("[CC] Hit and Run", CalloutProbability.Medium)]
+    [CalloutInterface("Hit and Run", CalloutProbability.Medium, "A student was struck by a vehicle exiting the ULSA parking lot.", "Code 2", "ULSAPD")]
     public class HitAndRun : Callout
     {
         //Private References
@@ -32,7 +32,6 @@ namespace CampusCallouts.Callouts
         private bool OnScene = false;
         private bool GatheredInfo = false;
         private bool DialoguePlayed = false;
-        private bool pursuitCreated = false;
         private bool TrafficStopAuthorized = false;
 
         private LHandle PulloverHandle;
@@ -66,7 +65,6 @@ namespace CampusCallouts.Callouts
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
             CalloutMessage = "Hit and Run";
-            FriendlyName = "hit and run";
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_HIT_AND_RUN_01 IN_OR_ON_POSITION", CalloutPosition);
             
 
@@ -221,7 +219,6 @@ namespace CampusCallouts.Callouts
                 LSPD_First_Response.Mod.API.Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
                 LSPD_First_Response.Mod.API.Functions.SetPursuitCopsCanJoin(Pursuit, true);
                 Game.DisplayNotification("The suspect is driving away!");
-                pursuitCreated = true;
             }
 
             //Check if the Player is close enough to interrogate the suspect

@@ -6,7 +6,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Student Escort", CalloutProbability.Low, "A student has requested an escort across campus.", "Code 1", "University and Local PD")]
+    [CalloutInterface("Student Escort", CalloutProbability.Low, "A student has requested an escort across campus.", "Code 1", "ULSAPD")]
     public class StudentEscort : Callout
     {
         //Private References
@@ -44,9 +44,6 @@ namespace CampusCallouts.Callouts
 
             //Create Callout message
             CalloutMessage = "Student Escort";
-
-            //Create friendly name
-            FriendlyName = "student escort request";
 
             //Last Line
             return base.OnBeforeCalloutDisplayed();

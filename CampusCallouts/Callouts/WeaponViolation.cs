@@ -7,7 +7,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Weapon Violation", CalloutProbability.Medium, "Reports of a person on campus possibly armed with a weapon.", "Code 3", "University and Local PD")]
+    [CalloutInterface("Weapon Violation", CalloutProbability.Medium, "Reports of a person on campus possibly armed with a weapon.", "Code 3", "ULSAPD")]
 
     public class WeaponViolation : Callout
     {
@@ -35,9 +35,6 @@ namespace CampusCallouts.Callouts
 
             //Create Callout message
             CalloutMessage = "Reports of an individual with a weapon";
-
-            //Create friendly name
-            FriendlyName = "reports of an individual with a weapon";
             
             //Last Line
             return base.OnBeforeCalloutDisplayed();
