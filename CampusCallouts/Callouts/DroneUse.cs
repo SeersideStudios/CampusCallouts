@@ -64,6 +64,10 @@ namespace CampusCallouts.Callouts
             //Start hover Loop
             GameFiber.StartNew(delegate
             {
+                GameFiber.Sleep(1000); // Let the object fully spawn and settle
+
+                if (!Drone.Exists()) return;
+
                 float baseZ = Drone.Position.Z;
                 bool goingUp = true;
 
@@ -71,11 +75,9 @@ namespace CampusCallouts.Callouts
                 {
                     Vector3 currentPos = Drone.Position;
 
-                    // Smoothly move up and down
                     float offset = goingUp ? 0.005f : -0.005f;
                     Drone.Position = new Vector3(currentPos.X, currentPos.Y, currentPos.Z + offset);
 
-                    // Toggle direction if it goes out of range
                     if (Drone.Position.Z >= baseZ + 0.1f) goingUp = false;
                     if (Drone.Position.Z <= baseZ - 0.1f) goingUp = true;
 
