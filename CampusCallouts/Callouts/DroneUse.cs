@@ -28,8 +28,8 @@ namespace CampusCallouts.Callouts
         public override bool OnBeforeCalloutDisplayed()
         {
             //Setting Spawn location for Ped
-            PedSpawn = new Vector3(1,1,1);
-            PedHeading = 1;
+            PedSpawn = new Vector3(-1672.595f, 213.435f, 62.12666f);
+            PedHeading = 278.3569f;
 
             //Setting the Callout location
             this.CalloutPosition = PedSpawn;
