@@ -7,7 +7,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("[CC] Students Fighting", CalloutProbability.Medium, "Two students are reportedly fighting on campus.", "Code 2", "ULSAPD")]
+    [CalloutInterface("[CC] Students Fighting", CalloutProbability.Medium, "Two students are reportedly fighting on campus.", "Code 3", "ULSAPD")]
     public class StudentsFighting : Callout
     {
         //Private References

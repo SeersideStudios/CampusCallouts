@@ -23,14 +23,38 @@ namespace CampusCallouts.Callouts
         private bool OnScene = false;
         private bool GatheredInfo = false;
 
+        private Rage.Object Drone;
+
         public override bool OnBeforeCalloutDisplayed()
         {
             //Setting Spawn location for Ped
-            PedSpawn = new Vector3(-1743.35f, 154.1355f, 64.37103f);
-            PedHeading = 215.159f;
+            PedSpawn = new Vector3(1,1,1);
+            PedHeading = 1;
 
             //Setting the Callout location
             this.CalloutPosition = PedSpawn;
+
+            //Start hover Loop
+            GameFiber.StartNew(delegate
+            {
+                float baseZ = Drone.Position.Z;
+                bool goingUp = true;
+
+                while (Drone.Exists() && !GatheredInfo)
+                {
+                    Vector3 currentPos = Drone.Position;
+
+                    // Smoothly move up and down
+                    float offset = goingUp ? 0.005f : -0.005f;
+                    Drone.Position = new Vector3(currentPos.X, currentPos.Y, currentPos.Z + offset);
+
+                    // Toggle direction if it goes out of range
+                    if (Drone.Position.Z >= baseZ + 0.1f) goingUp = false;
+                    if (Drone.Position.Z <= baseZ - 0.1f) goingUp = true;
+
+                    GameFiber.Sleep(15); // Controls speed/smoothness
+                }
+            });
 
             //LSPDFR Handling
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
@@ -51,6 +75,13 @@ namespace CampusCallouts.Callouts
             Ped = new Ped(PedSpawn, PedHeading);
             Ped.MakePersistent();
             Ped.BlockPermanentEvents = true;
+
+            //Play Animation
+            Ped.Tasks.PlayAnimation("amb@world_human_security_shine_torch@male@idle_b", "idle_e", 1.0f, AnimationFlags.Loop);
+
+            //Spawn Drone
+            Drone = new Rage.Object("xs_prop_arena_drone_01", Ped.GetOffsetPositionFront(1.5f));
+            Drone.MakePersistent();
 
             //Log
             Game.LogTrivial("CampusCallouts - Drone Use - Ped Created");
@@ -84,12 +115,6 @@ namespace CampusCallouts.Callouts
                 //Set On Scene
                 OnScene = true;
 
-
-                //Give Ped Task
-                PedBlip.DisableRoute();
-                Ped.Tasks.Clear();
-                Ped.Tasks.StandStill(-1);
-
                 //Show info
                 Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");
                 Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the suspect to gather Info.");
@@ -98,13 +123,38 @@ namespace CampusCallouts.Callouts
             if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 3f)
             {
                 int num = rand.Next(0, 2);
+                Ped.Tasks.Clear(); // Stops Animation
+                Game.LogTrivial("CampusCallouts - Drone Use - Dialogue started, response variation: " + num);
+
 
                 if (num == 1 && !GatheredInfo)
                 {
-                 
+                    Game.DisplaySubtitle("~b~You: ~w~Hey! Are you the one flying this drone?");
+                    GameFiber.Sleep(3500);
+                    Game.DisplaySubtitle("~y~Student: ~w~Yeah, what about it? I have permission.");
+                    GameFiber.Sleep(3500);
+                    Game.DisplaySubtitle("~b~You: ~w~Can I see that permit?");
+                    GameFiber.Sleep(3500);
+                    Game.DisplaySubtitle("~y~Student: ~w~I don’t have it on me. My professor said it was fine.");
+                    GameFiber.Sleep(3500);
+                    Game.DisplaySubtitle("~b~You: ~w~Without documented permission, I’ll need you to shut it down.");
+                    GameFiber.Sleep(3500);
+                    Game.DisplaySubtitle("~y~Student: ~w~This is ridiculous. I won't be listening to you.");
+                    GameFiber.Sleep(3500);
+                    Game.DisplayNotification("Deal with the suspect as you wish.");
+                    GatheredInfo = true;
+
                 }
                 else if (num == 0 && !GatheredInfo)
                 {
+                    Game.DisplaySubtitle("~b~You: ~w~Hey! Are you the one flying this drone?");
+                    GameFiber.Sleep(3500);
+                    Game.DisplaySubtitle("~y~Student: ~w~Yeah, is everything ok?");
+                    GameFiber.Sleep(3500);
+                    Game.DisplaySubtitle("~b~You: ~w~You’re not permitted to fly drones on school property.");
+                    GameFiber.Sleep(3500);
+                    Game.DisplaySubtitle("~y~Student: ~w~I get it. I’ll pack it up right now.");
+                    GameFiber.Sleep(3500);
 
                     GatheredInfo = true;
                     End();
@@ -122,8 +172,9 @@ namespace CampusCallouts.Callouts
             base.End();
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
+            if (Drone.Exists()) { Drone.Delete(); }
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
-            Game.LogTrivial("CampusCallouts - Trespassing - Callout cleaned up.");
+            Game.LogTrivial("CampusCallouts - Drone Use - Callout cleaned up.");
         }
     }
 }

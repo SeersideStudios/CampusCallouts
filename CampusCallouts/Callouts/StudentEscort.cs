@@ -41,7 +41,6 @@ namespace CampusCallouts.Callouts
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_CIVILIAN_NEEDING_ASSISTANCE_01 IN_OR_ON_POSITION", CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
 
             //Create Callout message
             CalloutMessage = "Student Escort";
