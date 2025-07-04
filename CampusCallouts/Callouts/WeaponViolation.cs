@@ -7,7 +7,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Weapon Violation", CalloutProbability.Medium, "Reports of a person on campus possibly armed with a weapon.", "Code 3", "ULSAPD")]
+    [CalloutInterface("[CC] Weapon Violation", CalloutProbability.Medium, "Reports of a person on campus possibly armed with a weapon.", "Code 3", "ULSAPD")]
 
     public class WeaponViolation : Callout
     {
@@ -32,6 +32,8 @@ namespace CampusCallouts.Callouts
             // LSPDFR
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_BRANDISHING_WEAPON_01 IN_OR_ON_POSITION", CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_99");
 
             //Create Callout message
             CalloutMessage = "Reports of an individual with a weapon";

@@ -10,7 +10,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Hit and Run", CalloutProbability.Medium, "A student was struck by a vehicle exiting the ULSA parking lot.", "Code 2", "ULSAPD")]
+    [CalloutInterface("[CC] Hit and Run", CalloutProbability.Medium, "A student was struck by a vehicle exiting the ULSA parking lot.", "Code 2", "ULSAPD")]
     public class HitAndRun : Callout
     {
         //Private References
@@ -66,7 +66,8 @@ namespace CampusCallouts.Callouts
             AddMinimumDistanceCheck(20f, CalloutPosition);
             CalloutMessage = "Hit and Run";
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_HIT_AND_RUN_01 IN_OR_ON_POSITION", CalloutPosition);
-            
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
+
 
             return base.OnBeforeCalloutDisplayed();
         }
@@ -265,12 +266,12 @@ namespace CampusCallouts.Callouts
         public override void End()
         {
             base.End();
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (Suspect.Exists()) { Suspect.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
             if (SuspectCar.Exists()) { SuspectCar.Dismiss(); }
             if (SuspectBlip.Exists()) { SuspectBlip.Delete(); }
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
             Game.LogTrivial("CampusCallouts - Hit and Run cleaned up.");
         }
     }

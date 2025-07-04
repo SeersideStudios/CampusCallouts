@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Trespasser", CalloutProbability.Medium, "A suspect is reported to be trespassing at the ULSA campus track field.", "Code 2", "ULSAPD")]
+    [CalloutInterface("[CC] Trespasser", CalloutProbability.Medium, "A suspect is reported to be trespassing at the ULSA campus track field.", "Code 2", "ULSAPD")]
     public class Trespasser : Callout
     {
         //Private References
@@ -42,6 +42,7 @@ namespace CampusCallouts.Callouts
             CalloutMessage = "Trespasser";
             CalloutAdvisory = "A suspect is said to have been trespassing at the Track field at ULSA.";
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_TRESPASSING_01 IN_OR_ON_POSITION", CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
 
             return base.OnBeforeCalloutDisplayed();
         }
@@ -155,9 +156,9 @@ namespace CampusCallouts.Callouts
         public override void End()
         {
             base.End();
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
             Game.LogTrivial("CampusCallouts - Trespassing - Callout cleaned up.");
         }
     }

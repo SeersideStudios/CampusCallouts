@@ -7,7 +7,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Students Fighting", CalloutProbability.Medium, "Two students are reportedly fighting on campus.", "Code 2", "ULSAPD")]
+    [CalloutInterface("[CC] Students Fighting", CalloutProbability.Medium, "Two students are reportedly fighting on campus.", "Code 2", "ULSAPD")]
     public class StudentsFighting : Callout
     {
         //Private References
@@ -30,6 +30,8 @@ namespace CampusCallouts.Callouts
             // LSPDFR
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_ASSAULT_ON_A_CIVILIAN_01 IN_OR_ON_POSITION", CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_3");
 
             //Create Callout message
             CalloutMessage = "Students Fighting";

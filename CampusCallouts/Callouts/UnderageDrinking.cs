@@ -9,7 +9,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Underage Drinking", CalloutProbability.Low, "A report of a student potentially drinking underage at a party.", "Code 2", "ULSAPD")]
+    [CalloutInterface("[CC] Underage Drinking", CalloutProbability.Low, "A report of a student potentially drinking underage at a party.", "Code 2", "ULSAPD")]
     public class UnderageDrinking : Callout
     {
         //Private References
@@ -33,6 +33,8 @@ namespace CampusCallouts.Callouts
             // LSPDFR
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_SUSPICIOUS_ACTIVITY_01 IN_OR_ON_POSITION", CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
 
             //Last Line
             return base.OnBeforeCalloutDisplayed();

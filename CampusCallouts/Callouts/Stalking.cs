@@ -6,7 +6,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Stalking Report", CalloutProbability.Low, "Student reported being followed by an unknown individual on campus.", "Code 2", "ULSAPD")]
+    [CalloutInterface("[CC] Stalking Report", CalloutProbability.Low, "Student reported being followed by an unknown individual on campus.", "Code 2", "ULSAPD")]
 
     public class StalkingReport : Callout
     {
@@ -32,6 +32,8 @@ namespace CampusCallouts.Callouts
             // LSPDFR
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_SUSPICIOUS_ACTIVITY_01 IN_OR_ON_POSITION", CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
 
             //Create Callout message
             CalloutMessage = "Reports of a Stalking";

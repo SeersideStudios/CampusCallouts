@@ -6,7 +6,7 @@ using CalloutInterfaceAPI;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("Student Escort", CalloutProbability.Low, "A student has requested an escort across campus.", "Code 1", "ULSAPD")]
+    [CalloutInterface("[CC] Student Escort", CalloutProbability.Low, "A student has requested an escort across campus.", "Code 1", "ULSAPD")]
     public class StudentEscort : Callout
     {
         //Private References
@@ -40,6 +40,8 @@ namespace CampusCallouts.Callouts
             // LSPDFR
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_CIVILIAN_NEEDING_ASSISTANCE_01 IN_OR_ON_POSITION", CalloutPosition);
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
 
             //Create Callout message
             CalloutMessage = "Student Escort";
