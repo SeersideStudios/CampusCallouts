@@ -34,28 +34,6 @@ namespace CampusCallouts.Callouts
             //Setting the Callout location
             this.CalloutPosition = PedSpawn;
 
-            //Start hover Loop
-            GameFiber.StartNew(delegate
-            {
-                float baseZ = Drone.Position.Z;
-                bool goingUp = true;
-
-                while (Drone.Exists() && !GatheredInfo)
-                {
-                    Vector3 currentPos = Drone.Position;
-
-                    // Smoothly move up and down
-                    float offset = goingUp ? 0.005f : -0.005f;
-                    Drone.Position = new Vector3(currentPos.X, currentPos.Y, currentPos.Z + offset);
-
-                    // Toggle direction if it goes out of range
-                    if (Drone.Position.Z >= baseZ + 0.1f) goingUp = false;
-                    if (Drone.Position.Z <= baseZ - 0.1f) goingUp = true;
-
-                    GameFiber.Sleep(15); // Controls speed/smoothness
-                }
-            });
-
             //LSPDFR Handling
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
@@ -82,6 +60,28 @@ namespace CampusCallouts.Callouts
             //Spawn Drone
             Drone = new Rage.Object("xs_prop_arena_drone_01", Ped.GetOffsetPositionFront(1.5f));
             Drone.MakePersistent();
+
+            //Start hover Loop
+            GameFiber.StartNew(delegate
+            {
+                float baseZ = Drone.Position.Z;
+                bool goingUp = true;
+
+                while (Drone.Exists() && !GatheredInfo)
+                {
+                    Vector3 currentPos = Drone.Position;
+
+                    // Smoothly move up and down
+                    float offset = goingUp ? 0.005f : -0.005f;
+                    Drone.Position = new Vector3(currentPos.X, currentPos.Y, currentPos.Z + offset);
+
+                    // Toggle direction if it goes out of range
+                    if (Drone.Position.Z >= baseZ + 0.1f) goingUp = false;
+                    if (Drone.Position.Z <= baseZ - 0.1f) goingUp = true;
+
+                    GameFiber.Sleep(15); // Controls speed/smoothness
+                }
+            });
 
             //Log
             Game.LogTrivial("CampusCallouts - Drone Use - Ped Created");
