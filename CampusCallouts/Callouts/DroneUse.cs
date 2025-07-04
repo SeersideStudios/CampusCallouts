@@ -107,6 +107,7 @@ namespace CampusCallouts.Callouts
             base.OnCalloutNotAccepted();
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
+            if (Drone.Exists()) { Drone.Delete(); }
         }
 
         public override void Process()

@@ -83,6 +83,7 @@
     <Compile Include="Callouts\DroneUse.cs" />
     <Compile Include="Callouts\Trespasser.cs" />
     <Compile Include="Callouts\UnderageDrinking.cs" />
+    <Compile Include="Callouts\Vandalism.cs" />
     <Compile Include="Callouts\WeaponViolation.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
