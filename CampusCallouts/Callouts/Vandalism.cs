@@ -26,8 +26,8 @@ namespace CampusCallouts.Callouts
         public override bool OnBeforeCalloutDisplayed()
         {
             // Set spawn
-            SuspectSpawn = new Vector3(1,1,1); // Set your preferred coordinates
-            SuspectHeading = 1f;
+            SuspectSpawn = new Vector3(-1635.329f, 209.3602f, 60.64125f); // Set your preferred coordinates
+            SuspectHeading = 102.1095f;
 
             CalloutPosition = SuspectSpawn;
 
@@ -50,12 +50,14 @@ namespace CampusCallouts.Callouts
 
             // Spawn spray can and artwork
             SprayCan = new Rage.Object("prop_cs_spray_can", Suspect.GetOffsetPositionFront(0.3f));
+            Game.LogTrivial("CampusCallouts - Vandalism - Spray Can Spawned");
             SprayCan.MakePersistent();
 
             float groundZ = (float)(World.GetGroundZ(Suspect.Position, true, true) ?? Suspect.Position.Z);
             Vector3 artPos = new Vector3(Suspect.Position.X + 1.0f, Suspect.Position.Y, groundZ);
 
-            Artwork = new Rage.Object("sf_int2_art_gf_option_2", artPos);
+            Artwork = new Rage.Object("ch3_rd2_billboard01graffiti", artPos);
+            Game.LogTrivial("CampusCallouts - Vandalism - Graffiti Spawned");
             Artwork.Rotation = new Rotator(90f, 0f, Suspect.Heading + 180f); // makes it flat
             Artwork.MakePersistent();
             Artwork.IsPositionFrozen = true;
