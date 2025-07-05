@@ -99,6 +99,7 @@ namespace CampusCallouts.Callouts
                 //Give Ped Task
                 PedBlip.DisableRoute();
                 Ped.Tasks.StandStill(-1);
+                Ped.Face(Game.LocalPlayer.Character);
 
                 //Show info
                 Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");

@@ -168,6 +168,7 @@ namespace CampusCallouts.Callouts
                 string model = SuspectCar.Model.Name;
                 string plate = SuspectCar.LicensePlate;
 
+                Ped.Face(Game.LocalPlayer.Character);
                 //Conversation
                 Game.DisplaySubtitle("~b~Student: ~w~Officer! Thank God you're here!");
                 GameFiber.Sleep(3500);

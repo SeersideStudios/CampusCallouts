@@ -7,13 +7,11 @@ using System.Drawing;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("[CC] Vandalism", CalloutProbability.Medium, "911 Caller reports of someone vandalising at the university", "Code 2", "ULSAPD")]
+    [CalloutInterface("[CC] Vandalism", CalloutProbability.Medium, "911 Caller reports of someone vandalizing university property", "Code 2", "ULSAPD")]
     public class Vandalism : Callout
     {
         private Ped Suspect;
         private Blip SuspectBlip;
-        private Rage.Object SprayCan;
-        private Rage.Object Artwork;
 
         private Vector3 SuspectSpawn;
         private float SuspectHeading;
@@ -25,16 +23,16 @@ namespace CampusCallouts.Callouts
 
         public override bool OnBeforeCalloutDisplayed()
         {
-            // Set spawn
-            SuspectSpawn = new Vector3(-1635.329f, 209.3602f, 60.64125f); // Set your preferred coordinates
-            SuspectHeading = 102.1095f;
+            // Set spawn location
+            SuspectSpawn = new Vector3(-1611.607f, 182.3768f, 59.72588f);
+            SuspectHeading = 223.0731f;
 
             CalloutPosition = SuspectSpawn;
 
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
             CalloutMessage = "Vandalism in Progress";
-            CalloutAdvisory = "911 Caller reports of someone vandalising at the university.";
+            CalloutAdvisory = "911 Caller reports of someone vandalizing university property.";
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_PROPERTY_DAMAGE_01 IN_OR_ON_POSITION", CalloutPosition);
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
 
@@ -48,31 +46,19 @@ namespace CampusCallouts.Callouts
             Suspect.MakePersistent();
             Suspect.BlockPermanentEvents = true;
 
-            // Spawn spray can and artwork
-            SprayCan = new Rage.Object("prop_cs_spray_can", Suspect.GetOffsetPositionFront(0.3f));
-            Game.LogTrivial("CampusCallouts - Vandalism - Spray Can Spawned");
-            SprayCan.MakePersistent();
+            // Gives Suspect Bat 
+            Suspect.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
 
-            float groundZ = (float)(World.GetGroundZ(Suspect.Position, true, true) ?? Suspect.Position.Z);
-            Vector3 artPos = new Vector3(Suspect.Position.X + 1.0f, Suspect.Position.Y, groundZ);
-
-            Artwork = new Rage.Object("ch3_rd2_billboard01graffiti", artPos);
-            Game.LogTrivial("CampusCallouts - Vandalism - Graffiti Spawned");
-            Artwork.Rotation = new Rotator(90f, 0f, Suspect.Heading + 180f); // makes it flat
-            Artwork.MakePersistent();
-            Artwork.IsPositionFrozen = true;
-
-
-            // Make suspect play spray animation
-            Suspect.Tasks.PlayAnimation("amb@world_human_security_shine_torch@male@idle_b", "idle_e", 1.0f, AnimationFlags.Loop);
+            // Suspect swings bat
+            Suspect.Tasks.PlayAnimation("melee@large_wpn@streamed_core", "plyr_rear_takedown_bat_r_facehit", 1.0f, AnimationFlags.Loop);
 
             // Create blip
             SuspectBlip = Suspect.AttachBlip();
             SuspectBlip.Color = Color.Red;
             SuspectBlip.EnableRoute(Color.Red);
 
-            Game.DisplayHelp("A student appears to be spray painting school property. Approach and investigate.");
-            Game.LogTrivial("CampusCallouts - Vandalism - Suspect created and objects spawned.");
+            Game.DisplayHelp("A student appears to be smashing school property with a bat. Approach and investigate.");
+            Game.LogTrivial("CampusCallouts - Vandalism - Suspect spawned and swinging bat.");
 
             return base.OnCalloutAccepted();
         }
@@ -82,8 +68,6 @@ namespace CampusCallouts.Callouts
             base.OnCalloutNotAccepted();
             if (Suspect.Exists()) Suspect.Dismiss();
             if (SuspectBlip.Exists()) SuspectBlip.Delete();
-            if (SprayCan.Exists()) SprayCan.Delete();
-            if (Artwork.Exists()) Artwork.Delete();
         }
 
         public override void Process()
@@ -94,33 +78,38 @@ namespace CampusCallouts.Callouts
             {
                 OnScene = true;
                 Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");
-                Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the suspect to gather info.");
+                Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the suspect to gather information.");
             }
 
             if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Suspect) <= 3f)
             {
                 Suspect.Tasks.Clear();
+                Suspect.Face(Game.LocalPlayer.Character);
                 int num = rand.Next(0, 2);
 
-                Game.LogTrivial("CampusCallouts - Vandalism - Dialogue variation: {num}");
+                Game.LogTrivial($"CampusCallouts - Vandalism - Dialogue variation: {num}");
 
                 if (num == 1)
                 {
-                    Game.DisplaySubtitle("~b~You: ~w~Are you defacing school property?");
+                    Game.DisplaySubtitle("~b~You: ~w~Put the bat down!");
                     GameFiber.Sleep(3000);
-                    Game.DisplaySubtitle("~r~Suspect: ~w~So what? It's art. You pigs don't get it.");
+                    Game.DisplaySubtitle("~r~Suspect: ~w~They rejected my transfer again! I’m done playing nice.");
                     GameFiber.Sleep(3000);
                     Game.DisplayNotification("Deal with the suspect as you see fit.");
+                    Suspect.BlockPermanentEvents = false;
+                    Suspect.Tasks.FightAgainst(Game.LocalPlayer.Character);
+                    
+
                 }
                 else
                 {
-                    Game.DisplaySubtitle("~b~You: ~w~Excuse me! Stop that right now.");
+                    Game.DisplaySubtitle("~b~You: ~w~Put the bat down. Now.");
                     GameFiber.Sleep(3000);
-                    Game.DisplaySubtitle("~r~Suspect: ~w~Sorry! I didn’t realize this was illegal here.");
+                    Game.DisplaySubtitle("~r~Suspect: ~w~Okay! Okay! I lost my temper...");
                     GameFiber.Sleep(3000);
-                    Game.DisplaySubtitle("~b~You: ~w~Step away from the wall.");
+                    Game.DisplaySubtitle("~b~You: ~w~You’re damaging public property. I can't let this go.");
                     GameFiber.Sleep(3000);
-                    Game.DisplayNotification("The suspect complied. You may issue a citation or a warning.");
+                    Game.DisplayNotification("The suspect appears cooperative. Proceed as you see fit.");
                 }
 
                 GatheredInfo = true;
@@ -137,8 +126,6 @@ namespace CampusCallouts.Callouts
             base.End();
             if (Suspect.Exists()) Suspect.Dismiss();
             if (SuspectBlip.Exists()) SuspectBlip.Delete();
-            if (SprayCan.Exists()) SprayCan.Delete();
-            if (Artwork.Exists()) Artwork.Delete();
 
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
             Game.LogTrivial("CampusCallouts - Vandalism - Callout cleaned up.");

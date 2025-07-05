@@ -55,6 +55,7 @@ namespace CampusCallouts.Callouts
             Ped = new Ped(PedSpawn, PedHeading);
             Ped.MakePersistent();
             Ped.BlockPermanentEvents = true;
+            Ped.Face(Game.LocalPlayer.Character);
 
             //Log
             Game.LogTrivial("CampusCallouts - Trespasser - Ped Created");
