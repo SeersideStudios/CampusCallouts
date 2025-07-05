@@ -15,6 +15,7 @@ namespace CampusCallouts
         public static readonly bool HitAndRun = ini.ReadBoolean("Callouts", "HitAndRun", true);
         public static readonly bool Trespasser = ini.ReadBoolean("Callouts", "Trespasser", true);
         public static readonly bool DroneUse = ini.ReadBoolean("Callouts", "DroneUse", true);
+        public static readonly bool Vandalism = ini.ReadBoolean("Callouts", "Vandalism", true);
 
     }
 }
