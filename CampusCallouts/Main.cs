@@ -137,6 +137,7 @@ namespace CampusCallouts
             if (Settings.Trespasser || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.Trespasser));
             if (Settings.DroneUse || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.DroneUse));
             if (Settings.Vandalism || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.Vandalism));
+            if (Settings.IntoxicatedStudent || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.IntoxicatedStudent));
             Game.LogTrivial("====================CAMPUSCALLOUTS CALLOUTS REGISTRATION====================");
             
         }

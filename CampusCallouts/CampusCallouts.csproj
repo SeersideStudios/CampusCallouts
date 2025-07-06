@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Callouts\Fight.cs" />
     <Compile Include="Callouts\HitAndRun.cs" />
+    <Compile Include="Callouts\IntoxicatedStudent.cs" />
     <Compile Include="Callouts\NoiseComplaint.cs" />
     <Compile Include="Callouts\Stalking.cs" />
     <Compile Include="Callouts\StudentEscort.cs" />

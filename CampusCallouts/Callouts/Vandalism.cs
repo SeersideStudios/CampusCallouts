@@ -91,26 +91,43 @@ namespace CampusCallouts.Callouts
 
                 if (num == 1)
                 {
-                    Game.DisplaySubtitle("~b~You: ~w~Put the bat down!");
-                    GameFiber.Sleep(3000);
-                    Game.DisplaySubtitle("~r~Suspect: ~w~They rejected my transfer again! I’m done playing nice.");
-                    GameFiber.Sleep(3000);
-                    Game.DisplayNotification("Deal with the suspect as you see fit.");
+                    Game.DisplaySubtitle("~b~You: ~w~Put the bat down! Step away from the flagpole!");
+                    GameFiber.Sleep(3500);
+
+                    Game.DisplaySubtitle("~r~Suspect: ~w~They rejected my transfer again! This school’s a joke.");
+                    GameFiber.Sleep(3500);
+
+                    Game.DisplaySubtitle("~b~You: ~w~Smashing things won’t fix that. Drop the weapon, now!");
+                    GameFiber.Sleep(3500);
+
+                    Game.DisplaySubtitle("~r~Suspect: ~w~No! I’ve had it! You’re not stopping me.");
+                    GameFiber.Sleep(3500);
+
+                    Game.DisplayNotification("The suspect is becoming aggressive!");
                     Suspect.BlockPermanentEvents = false;
                     Suspect.Tasks.FightAgainst(Game.LocalPlayer.Character);
-                    
-
                 }
+
                 else
                 {
-                    Game.DisplaySubtitle("~b~You: ~w~Put the bat down. Now.");
-                    GameFiber.Sleep(3000);
-                    Game.DisplaySubtitle("~r~Suspect: ~w~Okay! Okay! I lost my temper...");
-                    GameFiber.Sleep(3000);
-                    Game.DisplaySubtitle("~b~You: ~w~You’re damaging public property. I can't let this go.");
-                    GameFiber.Sleep(3000);
-                    Game.DisplayNotification("The suspect appears cooperative. Proceed as you see fit.");
+                    Game.DisplaySubtitle("~b~You: ~w~Put the bat down. What the hell are you doing?");
+                    GameFiber.Sleep(3500);
+
+                    Game.DisplaySubtitle("~r~Suspect: ~w~I... I’m sorry. I just lost it.");
+                    GameFiber.Sleep(3500);
+
+                    Game.DisplaySubtitle("~b~You: ~w~You're damaging school property. That’s a serious offense.");
+                    GameFiber.Sleep(3500);
+
+                    Game.DisplaySubtitle("~r~Suspect: ~w~I know. I just got an email saying I failed my final... I snapped.");
+                    GameFiber.Sleep(3500);
+
+                    Game.DisplaySubtitle("~b~You: ~w~That doesn’t excuse this behavior. You’re lucky someone didn’t get hurt.");
+                    GameFiber.Sleep(3500);
+
+                    Game.DisplayNotification("The suspect appears remorseful and is complying. Deal with him as you deem fit");
                 }
+
 
                 GatheredInfo = true;
             }
