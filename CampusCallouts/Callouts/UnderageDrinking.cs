@@ -111,7 +111,7 @@ namespace CampusCallouts.Callouts
                 this.End();
             }
 
-            if (Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            if (Game.IsKeyDown(Settings.EndCallout))
             {
                 GameFiber.Sleep(3000);
                 this.End();

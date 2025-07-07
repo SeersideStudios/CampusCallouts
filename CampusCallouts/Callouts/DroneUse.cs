@@ -141,7 +141,7 @@ namespace CampusCallouts.Callouts
                 GameFiber.Sleep(250); // Prevent multiple triggers from holding the key
             }
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Game.IsKeyDown(Settings.EndCallout))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Game.IsKeyDown(Settings.EndCallout) || Ped.IsDead)
             {
                 End();
             }

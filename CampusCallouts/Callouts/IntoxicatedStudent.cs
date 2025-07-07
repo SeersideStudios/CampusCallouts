@@ -98,7 +98,6 @@ namespace CampusCallouts.Callouts
             if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Student) <= 10f)
             {
                 OnScene = true;
-                Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");
                 Game.DisplaySubtitle("~y~[INFO]~w~ Approach and speak to the student.");
             }
 
@@ -204,7 +203,7 @@ namespace CampusCallouts.Callouts
             }
 
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Student) || Game.IsKeyDown(Settings.EndCallout))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Student) || Game.IsKeyDown(Settings.EndCallout) || Student.IsDead)
             {
                 End();
             }

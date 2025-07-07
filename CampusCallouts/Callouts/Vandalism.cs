@@ -156,7 +156,7 @@ namespace CampusCallouts.Callouts
                 }
             }
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(Settings.EndCallout))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(Settings.EndCallout) || Suspect.IsDead)
             {
                 End();
             }

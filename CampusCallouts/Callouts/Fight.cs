@@ -92,13 +92,13 @@ namespace CampusCallouts.Callouts
                 Game.DisplayHelp("Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
             }
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Ped.IsDead)
             {
                 GameFiber.Sleep(3000);
                 this.End();
             }
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped2))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped2) || Ped2.IsDead)
             {
                 GameFiber.Sleep(3000);
                 this.End();

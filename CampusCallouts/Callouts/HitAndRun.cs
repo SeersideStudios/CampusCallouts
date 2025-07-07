@@ -253,6 +253,7 @@ namespace CampusCallouts.Callouts
             {
                 // Notify to initiate Traffic Stop
                 Game.DisplayNotification("Suspect is cooperative, initiate a traffic stop and speak with them.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to speak with the driver.");
                 Game.LogTrivial("CampusCallouts - Traffic stop triggered");
                 TrafficStopAuthorized = true;
             }
@@ -300,7 +301,7 @@ namespace CampusCallouts.Callouts
 
 
             //Check conditions to end callout
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(Settings.EndCallout))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(Settings.EndCallout) || Ped.IsDead)
             {
                 End();
             }
