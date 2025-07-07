@@ -21,6 +21,10 @@ namespace CampusCallouts.Callouts
 
         private Random rand = new Random();
 
+        private int DialogueStep = 0;
+        private bool IsInDialogue = false;
+        private int dialogueVariant = -1;
+
         public override bool OnBeforeCalloutDisplayed()
         {
             // Set spawn location
@@ -77,66 +81,87 @@ namespace CampusCallouts.Callouts
             if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Suspect) <= 10f)
             {
                 OnScene = true;
-                Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
                 Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the suspect to gather information.");
             }
 
             if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Suspect) <= 3f)
             {
-                Suspect.Tasks.Clear();
-                Suspect.Face(Game.LocalPlayer.Character);
-                int num = rand.Next(0, 2);
-
-                Game.LogTrivial($"CampusCallouts - Vandalism - Dialogue variation: {num}");
-
-                if (num == 1)
+                if (!IsInDialogue)
                 {
-                    Game.DisplaySubtitle("~b~You: ~w~Put the bat down! Step away from the flagpole!");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~r~Suspect: ~w~They rejected my transfer again! This school’s a joke.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~b~You: ~w~Smashing things won’t fix that. Drop the weapon, now!");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~r~Suspect: ~w~No! I’ve had it! You’re not stopping me.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplayNotification("The suspect is becoming aggressive!");
-                    Suspect.BlockPermanentEvents = false;
-                    Suspect.Tasks.FightAgainst(Game.LocalPlayer.Character);
+                    Suspect.Tasks.Clear();
+                    Suspect.Face(Game.LocalPlayer.Character);
+                    IsInDialogue = true;
+                    DialogueStep = 0;
+                    dialogueVariant = rand.Next(0, 2);
+                    Game.LogTrivial($"CampusCallouts - Vandalism - Dialogue variation: {dialogueVariant}");
                 }
 
-                else
+                if (Game.IsKeyDown(Settings.DialogueKey))
                 {
-                    Game.DisplaySubtitle("~b~You: ~w~Put the bat down. What the hell are you doing?");
-                    GameFiber.Sleep(3500);
+                    if (dialogueVariant == 1) // Hostile variation
+                    {
+                        switch (DialogueStep)
+                        {
+                            case 0:
+                                Game.DisplaySubtitle("~b~You: ~w~Put the bat down! Step away from the flagpole!");
+                                break;
+                            case 1:
+                                Game.DisplaySubtitle("~r~Suspect: ~w~They rejected my transfer again! This school’s a joke.");
+                                break;
+                            case 2:
+                                Game.DisplaySubtitle("~b~You: ~w~Smashing things won’t fix that. Drop the weapon, now!");
+                                break;
+                            case 3:
+                                Game.DisplaySubtitle("~r~Suspect: ~w~No! I’ve had it! You’re not stopping me.");
+                                break;
+                            case 4:
+                                Game.DisplayNotification("The suspect is becoming aggressive!");
+                                Suspect.BlockPermanentEvents = false;
+                                Suspect.Tasks.FightAgainst(Game.LocalPlayer.Character);
+                                GatheredInfo = true;
+                                IsInDialogue = false;
+                                break;
+                        }
+                    }
+                    else // Compliant variation
+                    {
+                        switch (DialogueStep)
+                        {
+                            case 0:
+                                Game.DisplaySubtitle("~b~You: ~w~Put the bat down. What the hell are you doing?");
+                                break;
+                            case 1:
+                                Game.DisplaySubtitle("~r~Suspect: ~w~I... I’m sorry. I just lost it.");
+                                break;
+                            case 2:
+                                Game.DisplaySubtitle("~b~You: ~w~You're damaging school property. That’s a serious offense.");
+                                break;
+                            case 3:
+                                Game.DisplaySubtitle("~r~Suspect: ~w~I know. I just got an email saying I failed my final... I snapped.");
+                                break;
+                            case 4:
+                                Game.DisplaySubtitle("~b~You: ~w~That doesn’t excuse this behavior. You’re lucky someone didn’t get hurt.");
+                                break;
+                            case 5:
+                                Game.DisplayNotification("The suspect appears remorseful and is complying. Deal with him as you deem fit");
+                                GatheredInfo = true;
+                                IsInDialogue = false;
+                                break;
+                        }
+                    }
 
-                    Game.DisplaySubtitle("~r~Suspect: ~w~I... I’m sorry. I just lost it.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~b~You: ~w~You're damaging school property. That’s a serious offense.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~r~Suspect: ~w~I know. I just got an email saying I failed my final... I snapped.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~b~You: ~w~That doesn’t excuse this behavior. You’re lucky someone didn’t get hurt.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplayNotification("The suspect appears remorseful and is complying. Deal with him as you deem fit");
+                    DialogueStep++;
+                    GameFiber.Wait(200); // debounce
                 }
-
-
-                GatheredInfo = true;
             }
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(Settings.EndCallout))
             {
                 End();
             }
         }
+
 
         public override void End()
         {

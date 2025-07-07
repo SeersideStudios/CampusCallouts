@@ -26,6 +26,9 @@ namespace CampusCallouts.Callouts
 
         private LHandle Pursuit;
 
+        private int DialogueStep = 0;
+        private bool IsInDialogue = false;
+
         public override bool OnBeforeCalloutDisplayed()
         {
             //Setting Spawn location for Ped
@@ -89,70 +92,76 @@ namespace CampusCallouts.Callouts
         public override void Process()
         {
             base.Process();
-            if (!OnScene & Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
+
+            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
             {
-                //Set On Scene
                 OnScene = true;
-
-
-                //Give Ped Task
                 PedBlip.DisableRoute();
                 Ped.Tasks.Clear();
                 Ped.Tasks.StandStill(-1);
-
-                //Show info
-                Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");
-                Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the Trespasser to gather Info.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the trespasser.");
             }
 
             if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 3f)
             {
-                int num = rand.Next(0, 2);
-
-                if (num == 1 && !pursuitCreated && !GatheredInfo)
+                if (!IsInDialogue)
                 {
-                    //Make Ped leave
-                    Ped.Tasks.ReactAndFlee(Game.LocalPlayer.Character);
-
-                    Game.DisplaySubtitle("~y~Trespasser: ~w~I'm just testing out the track! Leave me alone!");
-                    GameFiber.Sleep(3500);
-
-                    //Create Pursuit
-                    Pursuit = LSPD_First_Response.Mod.API.Functions.CreatePursuit();
-                    LSPD_First_Response.Mod.API.Functions.AddPedToPursuit(Pursuit, Ped);
-                    LSPD_First_Response.Mod.API.Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
-                    LSPD_First_Response.Mod.API.Functions.SetPursuitCopsCanJoin(Pursuit, true);
-                    Game.DisplayNotification("The suspect is running away!");
-                    if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser reported running away");
-                    pursuitCreated = true;
-                    GatheredInfo = true;
+                    Ped.Face(Game.LocalPlayer.Character);
+                    IsInDialogue = true;
+                    DialogueStep = 0;
                 }
-                else if (num == 0 && !GatheredInfo)
+
+                if (Game.IsKeyDown(Settings.DialogueKey))
                 {
-                    Game.DisplaySubtitle("~b~You: ~w~Hey, what are you doing here? This area is off-limits.");
-                    GameFiber.Sleep(3500);
+                    switch (DialogueStep)
+                    {
+                        case 0:
+                            Game.DisplaySubtitle("~b~You: ~w~Hey, what are you doing here? This area is off-limits.");
+                            break;
+                        case 1:
+                            if (rand.Next(0, 2) == 1)
+                            {
+                                Game.DisplaySubtitle("~y~Trespasser: ~w~I'm just testing out the track! Leave me alone!");
+                                Ped.Tasks.ReactAndFlee(Game.LocalPlayer.Character);
+                                Pursuit = LSPD_First_Response.Mod.API.Functions.CreatePursuit();
+                                LSPD_First_Response.Mod.API.Functions.AddPedToPursuit(Pursuit, Ped);
+                                LSPD_First_Response.Mod.API.Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
+                                LSPD_First_Response.Mod.API.Functions.SetPursuitCopsCanJoin(Pursuit, true);
+                                Game.DisplayNotification("The suspect is running away!");
+                                if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser is fleeing on foot.");
+                                pursuitCreated = true;
+                                GatheredInfo = true;
+                                IsInDialogue = false;
+                            }
+                            else
+                            {
+                                Game.DisplaySubtitle("~y~Trespasser: ~w~I'm sorry, I didn't realize. I was just going for a run.");
+                            }
+                            break;
+                        case 2:
+                            Game.DisplaySubtitle("~b~You: ~w~You need to leave immediately. I’ll have to file a report.");
+                            break;
+                        case 3:
+                            Game.DisplaySubtitle("~y~Trespasser: ~w~Understood, I’ll head out now.");
+                            if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser was cooperative and is leaving.");
+                            GatheredInfo = true;
+                            IsInDialogue = false;
+                            End();
+                            break;
+                    }
 
-                    Game.DisplaySubtitle("~y~Trespasser: ~w~I'm sorry, I didn't realize. I was just going for a run.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~b~You: ~w~You need to leave immediately. I’ll have to file a report.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~y~Trespasser: ~w~Understood, I’ll head out now.");
-                    GameFiber.Sleep(3500);
-
-                    if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser handled, and dismissed.");
-
-                    GatheredInfo = true;
-                    End();
+                    DialogueStep++;
+                    GameFiber.Wait(200); // debounce
                 }
             }
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Game.IsKeyDown(Settings.EndCallout))
             {
                 End();
             }
         }
+
 
         public override void End()
         {

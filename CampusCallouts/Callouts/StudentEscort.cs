@@ -99,7 +99,7 @@ namespace CampusCallouts.Callouts
                 PedBlip.DisableRoute();
                 Ped.Tasks.LeaveVehicle(Car, LeaveVehicleFlags.None);
                 Ped.Tasks.StandStill(-1);
-                Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");
+                Game.DisplayHelp("Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
 
                 //DRAW BLIP
                 DestinationBlip = new Blip(Destination);
@@ -127,7 +127,7 @@ namespace CampusCallouts.Callouts
                 this.End();
             }
 
-            if (Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            if (Game.IsKeyDown(Settings.EndCallout))
             {
                 GameFiber.Sleep(3000);
                 this.End();

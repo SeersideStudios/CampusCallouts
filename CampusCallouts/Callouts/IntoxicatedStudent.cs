@@ -30,6 +30,11 @@ namespace CampusCallouts.Callouts
 
         private Random rand = new Random();
 
+        private int DialogueStep = 0;
+        private bool IsInDialogue = false;
+        private int DialogueVariant = -1;
+
+
         public override bool OnBeforeCalloutDisplayed()
         {
             // Set spawn location
@@ -99,106 +104,107 @@ namespace CampusCallouts.Callouts
 
             if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Student) <= 3f)
             {
-                Student.Tasks.Clear();
-                Student.Face(Game.LocalPlayer.Character);
-
-                int dialogueVariant = rand.Next(0, 2);
-                Game.LogTrivial($"CampusCallouts - IntoxicatedStudent - Dialogue variation: {dialogueVariant}");
-
-                if (dialogueVariant == 0)
+                if (!IsInDialogue)
                 {
-                    Game.DisplaySubtitle("~b~You: ~w~Hey, are you alright? You look pretty out of it.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~r~Student: ~w~Yeah... no. I just got into a stupid fight with my partner.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~r~Student: ~w~We’d been drinking. I said things I didn’t mean. It got... bad.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~b~You: ~w~Alright. Just stay calm. We can figure this out.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~r~Student: ~w~Wait... oh no. That’s them coming now...");
-                    GameFiber.Sleep(3500);
-
-                    // Spawn hostile group (significant other + friends)
-                    Vector3 spawnPos = Student.GetOffsetPositionFront(7f); // slightly ahead
-                    Ped hostile1 = new Ped("a_m_y_stwhi_01", spawnPos, Student.Heading + 180f);
-                    Ped hostile2 = new Ped("a_m_m_og_boss_01", spawnPos.Around(1.5f), Student.Heading + 180f);
-                    Ped hostile3 = new Ped("a_f_y_hipster_02", spawnPos.Around(2.0f), Student.Heading + 180f);
-
-                    // Make attacker persistent and armed
-                        attacker = new Ped(AttackerSpawn, AttackerHeading);
-                        attacker.MakePersistent();
-                        attacker.BlockPermanentEvents = true;
-                        attacker.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
-                        attacker.Tasks.FightAgainst(Student);
-                        attackerBlip = new Blip(attacker);
-                        attackerBlip.Color = Color.Red;
-
-                    //Attacker 2 possible coords
-                    //coords.x = -1659.96
-                    //coords.y = 252.1908
-                    //coords.z = 62.39095
-                    //heading = 25.20247
-
-                        attacker2 = new Ped(attacker.GetOffsetPositionFront(1.5f), attacker.Heading);
-                        attacker2.MakePersistent();
-                        attacker2.BlockPermanentEvents = true;
-                        attacker2.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
-                        attacker2.Tasks.FightAgainst(Student);
-                        attackerBlip2 = new Blip(attacker);
-                        attackerBlip2.Color = Color.Red;
-
-                    //Attacker 3 possible coords
-                    //coords.x = -1661.126
-                    //coords.y = 254.6588
-                    //coords.z = 62.39095
-                    //heading = 32.08498
-
-                        attacker3 = new Ped(attacker.GetOffsetPositionFront(-1.5f), attacker.Heading);
-                        attacker3.MakePersistent();
-                        attacker3.BlockPermanentEvents = true;
-                        attacker3.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
-                        attacker3.Tasks.FightAgainst(Student);
-                        attackerBlip3 = new Blip(attacker);
-                        attackerBlip3.Color = Color.Red;
-
-
-                    // Optional: Log and warning
-                    Game.LogTrivial("CampusCallouts - Intoxicated Student - Hostile group spawned and attacking student.");
-                    Game.DisplayNotification("The situation has escalated! Additional parties have arrived with weapons.");
-
-
-                }
-                else
-                {
-                    Game.DisplaySubtitle("~b~You: ~w~Hey. Stop right there.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~r~Student: ~w~Wh-whaaa? I’m juss walkin’ man… chillll.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~b~You: ~w~You’ve been reported for being drunk on campus. You're clearly not okay.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~r~Student: ~w~I ain’t hurtin’ no one… I jus' needed fresh airrr…");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~b~You: ~w~You're stumbling around drunk in public. That’s a safety issue.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplaySubtitle("~r~Student: ~w~This school’s a joke anyway… nobody even cares.");
-                    GameFiber.Sleep(3500);
-
-                    Game.DisplayNotification("The student is clearly intoxicated but not combative. Handle accordingly.");
+                    Student.Tasks.Clear();
+                    Student.Face(Game.LocalPlayer.Character);
+                    DialogueVariant = rand.Next(0, 2); // Randomize once
+                    DialogueStep = 0;
+                    IsInDialogue = true;
+                    Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
                 }
 
-                GatheredInfo = true;
+                if (Game.IsKeyDown(Settings.DialogueKey))
+                {
+                    GameFiber.Wait(200); // Debounce
+                    switch (DialogueVariant)
+                    {
+                        case 0:
+                            switch (DialogueStep)
+                            {
+                                case 0:
+                                    Game.DisplaySubtitle("~b~You: ~w~Hey, are you alright? You look pretty out of it.");
+                                    break;
+                                case 1:
+                                    Game.DisplaySubtitle("~r~Student: ~w~Yeah... no. I just got into a stupid fight with my partner.");
+                                    break;
+                                case 2:
+                                    Game.DisplaySubtitle("~r~Student: ~w~We’d been drinking. I said things I didn’t mean. It got... bad.");
+                                    break;
+                                case 3:
+                                    Game.DisplaySubtitle("~b~You: ~w~Alright. Just stay calm. We can figure this out.");
+                                    break;
+                                case 4:
+                                    Game.DisplaySubtitle("~r~Student: ~w~Wait... oh no. That’s them coming now...");
+                                    break;
+                                case 5:
+                                    // Spawn hostile group (significant other + friends)
+                                    Vector3 spawnPos = Student.GetOffsetPositionFront(7f);
+                                    attacker = new Ped(AttackerSpawn, AttackerHeading);
+                                    attacker.MakePersistent();
+                                    attacker.BlockPermanentEvents = true;
+                                    attacker.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
+                                    attacker.Tasks.FightAgainst(Student);
+                                    attackerBlip = new Blip(attacker) { Color = Color.Red };
+
+                                    attacker2 = new Ped(attacker.GetOffsetPositionFront(1.5f), attacker.Heading);
+                                    attacker2.MakePersistent();
+                                    attacker2.BlockPermanentEvents = true;
+                                    attacker2.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
+                                    attacker2.Tasks.FightAgainst(Student);
+                                    attackerBlip2 = new Blip(attacker2) { Color = Color.Red };
+
+                                    attacker3 = new Ped(attacker.GetOffsetPositionFront(-1.5f), attacker.Heading);
+                                    attacker3.MakePersistent();
+                                    attacker3.BlockPermanentEvents = true;
+                                    attacker3.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
+                                    attacker3.Tasks.FightAgainst(Student);
+                                    attackerBlip3 = new Blip(attacker3) { Color = Color.Red };
+
+                                    Game.DisplayNotification("The situation has escalated! Additional parties have arrived with weapons.");
+                                    Game.LogTrivial("CampusCallouts - Intoxicated Student - Hostile group spawned.");
+                                    GatheredInfo = true;
+                                    IsInDialogue = false;
+                                    break;
+                            }
+                            DialogueStep++;
+                            break;
+
+                        case 1:
+                            switch (DialogueStep)
+                            {
+                                case 0:
+                                    Game.DisplaySubtitle("~b~You: ~w~Hey. Stop right there.");
+                                    break;
+                                case 1:
+                                    Game.DisplaySubtitle("~r~Student: ~w~Wh-whaaa? I’m juss walkin’ man… chillll.");
+                                    break;
+                                case 2:
+                                    Game.DisplaySubtitle("~b~You: ~w~You’ve been reported for being drunk on campus. You're clearly not okay.");
+                                    break;
+                                case 3:
+                                    Game.DisplaySubtitle("~r~Student: ~w~I ain’t hurtin’ no one… I jus' needed fresh airrr…");
+                                    break;
+                                case 4:
+                                    Game.DisplaySubtitle("~b~You: ~w~You're stumbling around drunk in public. That’s a safety issue.");
+                                    break;
+                                case 5:
+                                    Game.DisplaySubtitle("~r~Student: ~w~This school’s a joke anyway… nobody even cares.");
+                                    break;
+                                case 6:
+                                    Game.DisplayNotification("The student is clearly intoxicated but not combative. Handle accordingly.");
+                                    GatheredInfo = true;
+                                    IsInDialogue = false;
+                                    break;
+                            }
+                            DialogueStep++;
+                            break;
+                    }
+                }
             }
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Student) || Game.IsKeyDown(System.Windows.Forms.Keys.End))
+
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Student) || Game.IsKeyDown(Settings.EndCallout))
             {
                 End();
             }

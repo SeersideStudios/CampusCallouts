@@ -31,11 +31,18 @@ namespace CampusCallouts.Callouts
         private bool PursuitAuthorized = false;
         private bool OnScene = false;
         private bool GatheredInfo = false;
-        private bool DialoguePlayed = false;
+        private bool PursuitDialoguePlayed = false;
         private bool TrafficStopAuthorized = false;
 
         private LHandle PulloverHandle;
         private LHandle Pursuit;
+
+        private int DialogueStep = 0;
+        private bool IsInDialogue = false;
+
+        private int PulloverDialogueStep = 0;
+        private bool InPulloverDialogue = false;
+
 
 
         private List<string> carList = new List<string>
@@ -152,63 +159,75 @@ namespace CampusCallouts.Callouts
         public override void Process()
         {
             base.Process();
-            
+
             // On Scene Events
             if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
             {
                 OnScene = true;
                 PedBlip.DisableRoute();
-                Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
             }
 
             // Interacting with ped
             if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 3f)
             {
-                //Get Vehicle Details
-                string model = SuspectCar.Model.Name;
-                string plate = SuspectCar.LicensePlate;
+                if (!IsInDialogue)
+                {
+                    Ped.Tasks.Clear();
+                    Ped.Face(Game.LocalPlayer.Character);
+                    IsInDialogue = true;
+                    DialogueStep = 0;
+                }
 
-                Ped.Face(Game.LocalPlayer.Character);
-                //Conversation
-                Game.DisplaySubtitle("~b~Student: ~w~Officer! Thank God you're here!");
-                GameFiber.Sleep(3500);
+                if (Game.IsKeyDown(Settings.DialogueKey))
+                {
+                    switch (DialogueStep)
+                    {
+                        case 0:
+                            Game.DisplaySubtitle("~b~Student: ~w~Officer! Thank God you're here!");
+                            break;
+                        case 1:
+                            Game.DisplaySubtitle("~g~You: ~w~Are you okay? What happened?");
+                            break;
+                        case 2:
+                            Game.DisplaySubtitle("~b~Student: ~w~I was crossing the street when a car came flying around the corner.");
+                            break;
+                        case 3:
+                            Game.DisplaySubtitle("~b~Student: ~w~It hit me and just kept going! Didn’t even slow down.");
+                            break;
+                        case 4:
+                            Game.DisplaySubtitle("~g~You: ~w~Did you get a good look at the vehicle?");
+                            break;
+                        case 5:
+                            string model = SuspectCar.Model.Name;
+                            string plate = SuspectCar.LicensePlate;
+                            Game.DisplaySubtitle($"~b~Student: ~w~Yeah... it was an ~y~{model}~w~ with the plate ~y~{plate}~w~.");
+                            break;
+                        case 6:
+                            Game.DisplaySubtitle("~g~You: ~w~Alright, I’ll see if I can find them.");
+                            break;
+                        case 7:
+                            // Final step: cleanup and progress
+                            if (Main.CalloutInterface)
+                                CalloutInterfaceAPI.Functions.SendMessage(this, "Student gave a vehicle description:\nModel: " + SuspectCar.Model.Name + "\nPlate: " + SuspectCar.LicensePlate);
 
-                Game.DisplaySubtitle("~g~You: ~w~Are you okay? What happened?");
-                GameFiber.Sleep(3500);
+                            SuspectBlip = Suspect.AttachBlip();
+                            SuspectBlip.Color = Color.Red;
+                            SuspectBlip.EnableRoute(Color.Red);
 
-                Game.DisplaySubtitle("~b~Student: ~w~I was crossing the street when a car came flying around the corner.");
-                GameFiber.Sleep(3500);
+                            Game.DisplayNotification("Find the vehicle, and interrogate the suspect.");
+                            PedBlip.Delete();
+                            GatheredInfo = true;
+                            IsInDialogue = false;
 
-                Game.DisplaySubtitle("~b~Student: ~w~It hit me and just kept going! Didn’t even slow down.");
-                GameFiber.Sleep(3500);
+                            PursuitAuthorized = new Random().Next(0, 2) == 0;
+                            Game.LogTrivial("CampusCallouts - Hit and Run - Pursuit authorized? " + PursuitAuthorized);
+                            break;
+                    }
 
-                Game.DisplaySubtitle("~g~You: ~w~Did you get a good look at the vehicle?");
-                GameFiber.Sleep(3500);
-
-                Game.DisplaySubtitle("~b~Student: ~w~Yeah... it was an ~y~" + model + " ~w~with the plate ~y~" + plate + "~w~.");
-                GameFiber.Sleep(4000);
-
-                Game.DisplaySubtitle("~g~You: ~w~Alright, I’ll see if I can find them.");
-                GameFiber.Sleep(3500);
-
-                //Callout Interface
-                if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Student gave a vehicle description:\nModel: " + model + "\nPlate: " + plate);
-
-
-                //Create the Blip for the suspect
-                SuspectBlip = Suspect.AttachBlip();
-                SuspectBlip.Color = Color.Red;
-                SuspectBlip.EnableRoute(Color.Red);
-
-                Game.DisplayNotification("Find the vehicle, and interrogate the suspect.");
-                PedBlip.Delete();
-
-                GatheredInfo = true;
-
-                Random randNum = new Random();
-                PursuitAuthorized = randNum.Next(0, 2) == 0;
-
-                Game.LogTrivial("CampusCallouts - Hit and Run - Pursuit authorized? " + PursuitAuthorized);
+                    DialogueStep++;
+                    GameFiber.Wait(200); // small debounce
+                }
             }
 
             //Check if the Player is close enough to start the pursuit
@@ -234,30 +253,47 @@ namespace CampusCallouts.Callouts
             //Check if the Suspect's Car is under a traffic stop and play dialogue
             if (LSPD_First_Response.Mod.API.Functions.IsPlayerPerformingPullover() && TrafficStopAuthorized)
             {
-                //Checks who you've pulled over
                 PulloverHandle = LSPD_First_Response.Mod.API.Functions.GetCurrentPullover();
 
-                if (!DialoguePlayed && PulloverHandle != null && LSPD_First_Response.Mod.API.Functions.GetPulloverSuspect(PulloverHandle) == Suspect && Game.LocalPlayer.Character.Position.DistanceTo(Suspect) <= 3f)
+                if (!PursuitDialoguePlayed && PulloverHandle != null && LSPD_First_Response.Mod.API.Functions.GetPulloverSuspect(PulloverHandle) == Suspect && Game.LocalPlayer.Character.Position.DistanceTo(Suspect) <= 3f)
                 {
-                    //Play the Dialogue
-                    Game.DisplaySubtitle("~g~You: ~w~Mind rolling down that window? We need to talk.");
-                    GameFiber.Sleep(3500);
+                    InPulloverDialogue = true;
+                }
 
-                    Game.DisplaySubtitle("~r~Suspect: ~w~...This about what happened back by the crosswalk?");
-                    GameFiber.Sleep(3500);
+                if (InPulloverDialogue && Game.IsKeyDown(Settings.DialogueKey))
+                {
+                    switch (PulloverDialogueStep)
+                    {
+                        case 0:
+                            Game.DisplaySubtitle("~g~You: ~w~Good evening. Do you know why I stopped you?");
+                            break;
+                        case 1:
+                            Game.DisplaySubtitle("~r~Suspect: ~w~...This about that pedestrian I almost hit?");
+                            break;
+                        case 2:
+                            Game.DisplaySubtitle("~g~You: ~w~You didn’t *almost* hit them. You made contact and then fled the scene.");
+                            break;
+                        case 3:
+                            Game.DisplaySubtitle("~r~Suspect: ~w~I didn’t even realize I actually hit anyone. I was scared and just kept driving...");
+                            break;
+                        case 4:
+                            Game.DisplaySubtitle("~g~You: ~w~That’s not how this works. Step out of the car for me.");
+                            Game.DisplayNotification("The suspect appears nervous but compliant. Proceed accordingly.");
+                            PursuitDialoguePlayed = true;
+                            InPulloverDialogue = false;
+                            break;
 
-                    Game.DisplaySubtitle("~g~You: ~w~You hit someone and left the scene. Step out of the vehicle.");
-                    GameFiber.Sleep(3500);
 
-                    Game.DisplaySubtitle("~r~Suspect: ~w~I—I freaked out. I didn’t mean to just drive off...");
-                    GameFiber.Sleep(3500);
+                    }
 
-                    DialoguePlayed = true;
+                    PulloverDialogueStep++;
+                    GameFiber.Wait(200);
                 }
             }
 
+
             //Check conditions to end callout
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(Settings.EndCallout))
             {
                 End();
             }

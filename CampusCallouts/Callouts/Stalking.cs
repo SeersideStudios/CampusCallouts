@@ -24,6 +24,9 @@ namespace CampusCallouts.Callouts
         private bool GatheredInfo = false;
         private bool OnScene = false;
 
+        private int DialogueStep = 0;
+        private bool IsInDialogue = false;
+
         public override bool OnBeforeCalloutDisplayed()
         {
             //Set callout position
@@ -88,55 +91,76 @@ namespace CampusCallouts.Callouts
 
         public override void Process()
         {
-            //First Line
             base.Process();
 
-            if (!OnScene & Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
+            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
             {
-                //Set On Scene
                 OnScene = true;
 
-                //Give Ped Task
                 PedBlip.DisableRoute();
                 Ped.Tasks.StandStill(-1);
                 Ped.Face(Game.LocalPlayer.Character);
-
-                //Show info
-                Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");
-                Game.DisplayNotification("~y~[INFO]~w~ Speak to the student and gather information");
-
-                //Make stalker leave
                 Stalker.Tasks.ReactAndFlee(Game.LocalPlayer.Character);
+
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplayNotification("~y~[INFO]~w~ Speak to the student and gather information.");
             }
 
-            if (!GatheredInfo & OnScene & Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 3f)
+            if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 3f)
             {
-                //Get stalker details
-                var gender = LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Stalker).Gender;
-                var age = LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Stalker).ModelAge;
+                if (!IsInDialogue)
+                {
+                    Ped.Tasks.Clear();
+                    Ped.Face(Game.LocalPlayer.Character);
+                    IsInDialogue = true;
+                    DialogueStep = 0;
+                }
 
-                //Conversation
-                Game.DisplaySubtitle("~b~Student: ~w~Thank you for coming officer!");
-                GameFiber.Sleep(3500);
-                Game.DisplaySubtitle("~g~You: ~w~Of course! What's going on?");
-                GameFiber.Sleep(3500);
-                Game.DisplaySubtitle("~b~Student: ~w~I believe someone is following me.");
-                GameFiber.Sleep(3500);
-                Game.DisplaySubtitle("~g~You: ~w~Can you describe the person?");
-                GameFiber.Sleep(3500);
-                Game.DisplaySubtitle("~b~Student: ~w~Yes, it is a ~y~" + gender + " ~w~who is ~y~" + age);
-                GameFiber.Sleep(5000);
-                Game.DisplaySubtitle("~g~You: ~w~Okay! I will see if I can locate them!");
-                GameFiber.Sleep(3500);
+                if (Game.IsKeyDown(Settings.DialogueKey))
+                {
+                    var gender = LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Stalker).Gender.ToString();
+                    var age = LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Stalker).ModelAge;
 
-                //Create Pursuit
-                CalloutInterfaceAPI.Functions.SendMessage(this, "Victim provided a suspect description:\nGender: " + gender + "\nEstimated Age: " + age + "\nSuspect has fled.");
-                LHandle Pursuit = LSPD_First_Response.Mod.API.Functions.CreatePursuit();
-                LSPD_First_Response.Mod.API.Functions.AddPedToPursuit(Pursuit, Stalker);
-                LSPD_First_Response.Mod.API.Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
-                LSPD_First_Response.Mod.API.Functions.SetPursuitCopsCanJoin(Pursuit, true);
+                    switch (DialogueStep)
+                    {
+                        case 0:
+                            Game.DisplaySubtitle("~b~Student: ~w~Thank you for coming, officer!");
+                            break;
+                        case 1:
+                            Game.DisplaySubtitle("~g~You: ~w~Of course. What's going on?");
+                            break;
+                        case 2:
+                            Game.DisplaySubtitle("~b~Student: ~w~I think someone is following me. They've been behind me for blocks.");
+                            break;
+                        case 3:
+                            Game.DisplaySubtitle("~g~You: ~w~Do you know who it is?");
+                            break;
+                        case 4:
+                            Game.DisplaySubtitle($"~b~Student: ~w~No, but it’s a ~y~{gender} ~w~who looks about ~y~{age}~w~.");
+                            break;
+                        case 5:
+                            Game.DisplaySubtitle("~g~You: ~w~Alright. I’ll try to catch up to them.");
+                            break;
+                        case 6:
+                            // Initiate pursuit
+                            if (Main.CalloutInterface)
+                            {
+                                CalloutInterfaceAPI.Functions.SendMessage(this, $"Victim provided a suspect description:\nGender: {gender}\nEstimated Age: {age}\nSuspect has fled.");
+                            }
 
-                GatheredInfo = true;
+                            LHandle Pursuit = LSPD_First_Response.Mod.API.Functions.CreatePursuit();
+                            LSPD_First_Response.Mod.API.Functions.AddPedToPursuit(Pursuit, Stalker);
+                            LSPD_First_Response.Mod.API.Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
+                            LSPD_First_Response.Mod.API.Functions.SetPursuitCopsCanJoin(Pursuit, true);
+
+                            GatheredInfo = true;
+                            IsInDialogue = false;
+                            break;
+                    }
+
+                    DialogueStep++;
+                    GameFiber.Wait(200);
+                }
             }
 
             if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Stalker))
@@ -148,16 +172,15 @@ namespace CampusCallouts.Callouts
             if (Stalker.IsDead)
             {
                 CalloutInterfaceAPI.Functions.SendMessage(this, "Suspect is down. Code 4.");
-                if (Stalker.Exists()) { Stalker.Dismiss(); }
                 this.End();
             }
 
-            if (Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            if (Game.IsKeyDown(Settings.EndCallout))
             {
-                if (Stalker.Exists()) { Stalker.Dismiss(); }
                 this.End();
             }
         }
+
 
         public override void End()
         {
@@ -165,6 +188,7 @@ namespace CampusCallouts.Callouts
             base.End();
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
+            if (Stalker.Exists()) Stalker.Dismiss();
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
             Game.LogTrivial("CampusCallouts - StalkingReport - Callout cleaned up.");
         }

@@ -25,6 +25,10 @@ namespace CampusCallouts.Callouts
 
         private Rage.Object Drone;
 
+        private int dialogueStage = 0;
+        private bool dialogueStarted = false;
+        private int selectedDialogue = -1; // 0 or 1
+
         public override bool OnBeforeCalloutDisplayed()
         {
             //Setting Spawn location for Ped
@@ -113,62 +117,95 @@ namespace CampusCallouts.Callouts
         public override void Process()
         {
             base.Process();
-            if (!OnScene & Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
+
+            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
             {
-                //Set On Scene
                 OnScene = true;
-
-                //Show info
-                Game.DisplayHelp("Press the ~y~END~w~ key to end the call at any time.");
-                Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the suspect to gather Info.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the suspect to gather info.");
             }
 
-            if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 3f)
+            if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 3f && !dialogueStarted)
             {
-                int num = rand.Next(0, 2);
-                Ped.Tasks.Clear(); // Stops Animation
-                Game.LogTrivial("CampusCallouts - Drone Use - Dialogue started, response variation: " + num);
+                Ped.Tasks.Clear();
+                Ped.Face(Game.LocalPlayer.Character);
+                selectedDialogue = rand.Next(0, 2);
+                dialogueStarted = true;
 
-
-                if (num == 1 && !GatheredInfo)
-                {
-                    Game.DisplaySubtitle("~b~You: ~w~Hey! Are you the one flying this drone?");
-                    GameFiber.Sleep(3500);
-                    Game.DisplaySubtitle("~y~Student: ~w~Yeah, what about it? I have permission.");
-                    GameFiber.Sleep(3500);
-                    Game.DisplaySubtitle("~b~You: ~w~Can I see that permit?");
-                    GameFiber.Sleep(3500);
-                    Game.DisplaySubtitle("~y~Student: ~w~I don’t have it on me. My professor said it was fine.");
-                    GameFiber.Sleep(3500);
-                    Game.DisplaySubtitle("~b~You: ~w~Without documented permission, I’ll need you to shut it down.");
-                    GameFiber.Sleep(3500);
-                    Game.DisplaySubtitle("~y~Student: ~w~This is ridiculous. I won't be listening to you.");
-                    GameFiber.Sleep(3500);
-                    Game.DisplayNotification("Deal with the suspect as you wish.");
-                    GatheredInfo = true;
-
-                }
-                else if (num == 0 && !GatheredInfo)
-                {
-                    Game.DisplaySubtitle("~b~You: ~w~Hey! Are you the one flying this drone?");
-                    GameFiber.Sleep(3500);
-                    Game.DisplaySubtitle("~y~Student: ~w~Yeah, is everything ok?");
-                    GameFiber.Sleep(3500);
-                    Game.DisplaySubtitle("~b~You: ~w~You’re not permitted to fly drones on school property.");
-                    GameFiber.Sleep(3500);
-                    Game.DisplaySubtitle("~y~Student: ~w~I get it. I’ll pack it up right now.");
-                    GameFiber.Sleep(3500);
-
-                    GatheredInfo = true;
-                    End();
-                }
+                Game.DisplaySubtitle("Press ~y~" + Settings.DialogueKey + "~w~ to begin conversation.");
             }
 
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            if (dialogueStarted && Game.IsKeyDown(Settings.DialogueKey))
+            {
+                HandleDialogue();
+                GameFiber.Sleep(250); // Prevent multiple triggers from holding the key
+            }
+
+            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Game.IsKeyDown(Settings.EndCallout))
             {
                 End();
             }
         }
+
+        private void HandleDialogue()
+        {
+            if (selectedDialogue == 0)
+            {
+                switch (dialogueStage)
+                {
+                    case 0:
+                        Game.DisplaySubtitle("~b~You: ~w~Hey! Are you the one flying this drone?");
+                        break;
+                    case 1:
+                        Game.DisplaySubtitle("~y~Student: ~w~Yeah, is everything ok?");
+                        break;
+                    case 2:
+                        Game.DisplaySubtitle("~b~You: ~w~You’re not permitted to fly drones on school property.");
+                        break;
+                    case 3:
+                        Game.DisplaySubtitle("~y~Student: ~w~I get it. I’ll pack it up right now.");
+                        break;
+                    case 4:
+                        Game.DisplayNotification("The student complies. You may end the call.");
+                        GatheredInfo = true;
+                        dialogueStarted = false;
+                        End();
+                        return;
+                }
+            }
+            else if (selectedDialogue == 1)
+            {
+                switch (dialogueStage)
+                {
+                    case 0:
+                        Game.DisplaySubtitle("~b~You: ~w~Hey! Are you the one flying this drone?");
+                        break;
+                    case 1:
+                        Game.DisplaySubtitle("~y~Student: ~w~Yeah, what about it? I have permission.");
+                        break;
+                    case 2:
+                        Game.DisplaySubtitle("~b~You: ~w~Can I see that permit?");
+                        break;
+                    case 3:
+                        Game.DisplaySubtitle("~y~Student: ~w~I don’t have it on me. My professor said it was fine.");
+                        break;
+                    case 4:
+                        Game.DisplaySubtitle("~b~You: ~w~Without documented permission, I’ll need you to shut it down.");
+                        break;
+                    case 5:
+                        Game.DisplaySubtitle("~y~Student: ~w~This is ridiculous. I won't be listening to you.");
+                        break;
+                    case 6:
+                        Game.DisplayNotification("Deal with the suspect as you wish.");
+                        GatheredInfo = true;
+                        dialogueStarted = false;
+                        return;
+                }
+            }
+
+            dialogueStage++;
+        }
+
 
         public override void End()
         {

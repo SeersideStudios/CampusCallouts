@@ -91,7 +91,7 @@ namespace CampusCallouts.Callouts
                 Ped2.Tasks.FightAgainst(Ped, -1);
                 CalloutInterfaceAPI.Functions.SendMessage(this, "Two students are actively fighting.\nSeparate and detain both individuals if necessary.");
                 PedBlip.DisableRoute();
-                Game.DisplayHelp("Press the ~y~END~w~ key to end the call.");
+                Game.DisplayHelp("Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
             }
 
             if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped))
@@ -106,7 +106,7 @@ namespace CampusCallouts.Callouts
                 this.End();
             }
 
-            if (Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            if (Game.IsKeyDown(Settings.EndCallout))
             {
                 GameFiber.Sleep(3000);
                 this.End();

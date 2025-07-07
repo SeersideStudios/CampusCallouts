@@ -102,7 +102,7 @@ namespace CampusCallouts.Callouts
             {
                 OnScene = true;
                 PedBlip.DisableRoute();
-                Game.DisplayHelp("Investigate the area. Press the ~y~END~w~ key to end the call.");
+                Game.DisplayHelp("Use StopThePed for this callout. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
                 CalloutInterfaceAPI.Functions.SendMessage(this, "You have arrived at the party. Witness reportedly observed underage drinking.\nSpeak with the individual and take appropriate action.");
             }
 

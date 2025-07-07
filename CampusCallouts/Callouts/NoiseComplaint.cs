@@ -1,8 +1,9 @@
-﻿using LSPD_First_Response.Mod.Callouts;
+﻿using CalloutInterfaceAPI;
 using LSPD_First_Response.Mod.API;
+using LSPD_First_Response.Mod.Callouts;
 using Rage;
 using System.Drawing;
-using CalloutInterfaceAPI;
+using System.Xml.Linq;
 
 namespace CampusCallouts.Callouts
 {
@@ -135,11 +136,11 @@ namespace CampusCallouts.Callouts
                 OnScene = true;
                 DrivewayBlip.DisableRoute();
                 CalloutInterfaceAPI.Functions.SendMessage(this, "You have arrived at the reported location.\nInvestigate the group and speak to individuals.");
-                Game.DisplayHelp("Investigate the area. Press the ~y~END~w~ key to end the call.");
-                Game.DisplayNotification("~y~[INFO]~w~ Be sure to check ID's of anyone drinking");
+                Game.DisplayHelp("Investigate the area, (StopThePed reccomended). Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplayNotification("~y~[INFO]~w~ Be sure to check ID's of anyone drinking.");
             }
             
-            if (Game.IsKeyDown(System.Windows.Forms.Keys.End))
+            if (Game.IsKeyDown(Settings.EndCallout))
             {
                 GameFiber.Sleep(3000);
                 this.End();
