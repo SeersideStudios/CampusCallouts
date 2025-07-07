@@ -233,8 +233,14 @@ namespace CampusCallouts.Callouts
             //Check if the Player is close enough to start the pursuit
             if (GatheredInfo && PursuitAuthorized && Game.LocalPlayer.Character.Position.DistanceTo(Suspect) <= 10f)
             {
+                // Safeguard to not re-trigger
+                GatheredInfo = false;
+                TrafficStopAuthorized = false;
+                InPulloverDialogue = false;
 
                 //Create the pursuit
+                Game.LogTrivial("CampusCallouts - Entering pursuit logic");
+                Suspect.Tasks.Clear(); // before adding to pursuit
                 Pursuit = LSPD_First_Response.Mod.API.Functions.CreatePursuit();
                 LSPD_First_Response.Mod.API.Functions.AddPedToPursuit(Pursuit, Suspect);
                 LSPD_First_Response.Mod.API.Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
@@ -247,6 +253,7 @@ namespace CampusCallouts.Callouts
             {
                 // Notify to initiate Traffic Stop
                 Game.DisplayNotification("Suspect is cooperative, initiate a traffic stop and speak with them.");
+                Game.LogTrivial("CampusCallouts - Traffic stop triggered");
                 TrafficStopAuthorized = true;
             }
 
@@ -297,6 +304,14 @@ namespace CampusCallouts.Callouts
             {
                 End();
             }
+
+            if (!Suspect.Exists() || !SuspectCar.Exists())
+            {
+                End();
+                Game.LogTrivial("CampusCallouts - Hit and Run - Suspect or Car does not exist, ending callout.");
+                return;
+            }
+
 
         }
 

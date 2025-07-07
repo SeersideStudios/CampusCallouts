@@ -105,7 +105,6 @@ namespace CampusCallouts.Callouts
 
             //Create Blip
             DrivewayBlip = new Blip(DrivewayLocation);
-            DrivewayBlip.Sprite = BlipSprite.Friend;
             DrivewayBlip.Color = Color.Blue;
 
             //Draw Route

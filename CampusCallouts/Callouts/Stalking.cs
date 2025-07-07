@@ -61,7 +61,6 @@ namespace CampusCallouts.Callouts
             
             //Create Blips
             PedBlip = Ped.AttachBlip();
-            PedBlip.Sprite = BlipSprite.Friend;
             PedBlip.Color = Color.Blue;
 
             //Draw Route

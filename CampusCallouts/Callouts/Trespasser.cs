@@ -22,7 +22,6 @@ namespace CampusCallouts.Callouts
 
         private bool OnScene = false;
         private bool GatheredInfo = false;
-        private bool pursuitCreated = false;
 
         private LHandle Pursuit;
 
@@ -130,7 +129,6 @@ namespace CampusCallouts.Callouts
                                 LSPD_First_Response.Mod.API.Functions.SetPursuitCopsCanJoin(Pursuit, true);
                                 Game.DisplayNotification("The suspect is running away!");
                                 if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "Trespasser is fleeing on foot.");
-                                pursuitCreated = true;
                                 GatheredInfo = true;
                                 IsInDialogue = false;
                             }

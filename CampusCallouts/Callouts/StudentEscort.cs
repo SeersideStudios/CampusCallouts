@@ -64,7 +64,6 @@ namespace CampusCallouts.Callouts
 
             //Create Blip
             PedBlip = Ped.AttachBlip();
-            PedBlip.Sprite = BlipSprite.Friend;
             PedBlip.Color = Color.Blue;
 
             //Draw Route
@@ -103,7 +102,6 @@ namespace CampusCallouts.Callouts
 
                 //DRAW BLIP
                 DestinationBlip = new Blip(Destination);
-                DestinationBlip.Sprite = BlipSprite.Friend;
                 DestinationBlip.Color = Color.Blue;
 
                 //Wait 5 Seconds
