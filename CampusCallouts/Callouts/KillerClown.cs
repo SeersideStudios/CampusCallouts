@@ -16,6 +16,8 @@ namespace CampusCallouts.Callouts
         private Vector3 SpawnArea;
         private Random rand = new Random();
 
+        private bool OnScene = false;
+
         public override bool OnBeforeCalloutDisplayed()
         {
             SpawnArea = new Vector3(-1649.038f, 215.1764f, 60.64111f); // Clown General Spawn Area
@@ -79,13 +81,24 @@ namespace CampusCallouts.Callouts
                 }
 
                 // Attack whoever they hate
-                clown.Tasks.FightAgainstClosestHatedTarget(100f);
+                GameFiber.StartNew(delegate
+                {
+                    GameFiber.Sleep(1000); // short delay to let relationships initialize
+                    if (clown.Exists())
+                    {
+                        clown.Tasks.FightAgainstClosestHatedTarget(100f);
+                    }
+                });
 
                 Blip blip = clown.AttachBlip();
                 blip.Color = Color.Red;
 
                 Clowns.Add(clown);
                 ClownBlips.Add(blip);
+
+                Game.LogTrivial($"CampusCallouts - KillerClown - Clown {i} spawned at {pos}.");
+
+                if (i == 0) { ClownBlips[0].EnableRoute(Color.Red); }
             }
 
             if (Main.CalloutInterface)
@@ -112,6 +125,13 @@ namespace CampusCallouts.Callouts
             if (AllClownsNeutralized() || Game.IsKeyDown(Settings.EndCallout))
             {
                 End();
+            }
+
+            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Clowns[0]) <= 10f)
+            {
+                OnScene = true;
+                ClownBlips[0].DisableRoute();
+                Game.DisplayHelp("Press " + Settings.EndCallout + "~w~ to end the call.");
             }
         }
 
