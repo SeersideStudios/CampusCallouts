@@ -11,11 +11,15 @@ namespace CampusCallouts.Callouts
     [CalloutInterface("[CC] Killer Clown Sighting", CalloutProbability.Medium, "911 Caller reports multiple individuals dressed as clowns behaving aggressively.", "Code 3", "ULSAPD")]
     public class KillerClown : Callout
     {
+        // Private References
         private List<Ped> Clowns = new List<Ped>();
         private List<Blip> ClownBlips = new List<Blip>();
+
         private Vector3 SpawnArea;
+
         private Random rand = new Random();
 
+        private bool CombatStarted = false;
         private bool OnScene = false;
 
         public override bool OnBeforeCalloutDisplayed()
@@ -80,16 +84,6 @@ namespace CampusCallouts.Callouts
                     GameFiber.Yield(); // prevents freezing
                 }
 
-                // Attack whoever they hate
-                GameFiber.StartNew(delegate
-                {
-                    GameFiber.Sleep(1000); // short delay to let relationships initialize
-                    if (clown.Exists())
-                    {
-                        clown.Tasks.FightAgainstClosestHatedTarget(100f);
-                    }
-                });
-
                 Blip blip = clown.AttachBlip();
                 blip.Color = Color.Red;
 
@@ -122,6 +116,28 @@ namespace CampusCallouts.Callouts
         {
             base.Process();
 
+            // Start clown attacks when player is close enough (e.g., 100f)
+            if (!CombatStarted && Game.LocalPlayer.Character.Position.DistanceTo(Clowns[0]) <= 100f)
+            {
+                Game.LogTrivial("CampusCallouts - KillerClown - Player is within 100f. Clowns begin hostile behavior.");
+                CombatStarted = true;
+            }
+
+            // Actively make clowns scan and attack closest targets repeatedly
+            if (CombatStarted)
+            {
+                foreach (Ped clown in Clowns)
+                {
+                    if (clown.Exists() && !clown.IsDead && !clown.IsInCombat)
+                    {
+                        AssignRelationshipsToNearbyPeds(clown); 
+
+                        clown.Tasks.FightAgainstClosestHatedTarget(30f);
+                    }
+                }
+            }
+
+
             if (AllClownsNeutralized() || Game.IsKeyDown(Settings.EndCallout))
             {
                 End();
@@ -144,6 +160,30 @@ namespace CampusCallouts.Callouts
             }
             return true;
         }
+
+        private void AssignRelationshipsToNearbyPeds(Ped clown)
+        {
+            Ped[] allPeds = World.GetAllPeds();
+            Ped player = Game.LocalPlayer.Character;
+
+            for (int j = 0; j < 25; j++)
+            {
+                try
+                {
+                    if (allPeds[j].Exists() && allPeds[j] != player && allPeds[j] != clown)
+                    {
+                        clown.RelationshipGroup.SetRelationshipWith(allPeds[j].RelationshipGroup, Relationship.Hate);
+                    }
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    Game.LogTrivial("CampusCallouts - KillerClown - Index out of bounds on ped scan.");
+                    break;
+                }
+                GameFiber.Yield(); // Prevents freezing
+            }
+        }
+
 
         public override void End()
         {
