@@ -61,9 +61,11 @@ namespace CampusCallouts.Callouts
                 }
 
 
-                clown.RelationshipGroup = RelationshipGroup.Gang1;
-                clown.RelationshipGroup.SetRelationshipWith(player.RelationshipGroup, Relationship.Hate);
+                clown.RelationshipGroup = new RelationshipGroup("KILLERCLOWN_" + i);
+
                 clown.RelationshipGroup.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
+                clown.RelationshipGroup.SetRelationshipWith(player.RelationshipGroup, Relationship.Hate);
+
 
                 // Hate everyone nearby (except player and themselves)
                 Ped[] allPeds = World.GetAllPeds();
@@ -73,6 +75,8 @@ namespace CampusCallouts.Callouts
                     {
                         if (allPeds[j].Exists() && allPeds[j] != player && allPeds[j] != clown)
                         {
+                            // Skip if ped is another clown
+                            if (allPeds[j].Model.Name == "S_M_Y_Clown_01") continue;
                             clown.RelationshipGroup.SetRelationshipWith(allPeds[j].RelationshipGroup, Relationship.Hate);
                         }
                     }
