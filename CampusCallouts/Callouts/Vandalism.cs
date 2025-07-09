@@ -37,8 +37,17 @@ namespace CampusCallouts.Callouts
             AddMinimumDistanceCheck(20f, CalloutPosition);
             CalloutMessage = "Vandalism in Progress";
             CalloutAdvisory = "911 Caller reports of someone vandalizing university property.";
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_PROPERTY_DAMAGE_01 IN_OR_ON_POSITION", CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
+
+            if (Settings.UseBluelineAudio)
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_CRIMINAL_ACTIVITY_04 IN_OR_ON_POSITION", CalloutPosition);
+            }
+            else
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_CRIME_CRIMINAL_ACTIVITY_05 IN_OR_ON_POSITION", CalloutPosition);
+            }
+
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_02_02");
 
             return base.OnBeforeCalloutDisplayed();
         }

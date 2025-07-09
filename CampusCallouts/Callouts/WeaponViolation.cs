@@ -32,8 +32,17 @@ namespace CampusCallouts.Callouts
             // LSPDFR
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_BRANDISHING_WEAPON_01 IN_OR_ON_POSITION", CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_99");
+
+            if (Settings.UseBluelineAudio)
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_SHOTS_FIRED_02 IN_OR_ON_POSITION", CalloutPosition);
+            }
+            else
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_CRIME_ASSAULT_WITH_A_DEADLY_WEAPON_01 IN_OR_ON_POSITION", CalloutPosition);
+            }
+
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_99_03");
 
             //Create Callout message
             CalloutMessage = "Reports of an individual with a weapon";

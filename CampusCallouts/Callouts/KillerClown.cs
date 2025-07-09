@@ -32,8 +32,17 @@ namespace CampusCallouts.Callouts
 
             CalloutMessage = "Killer Clown Sighting";
             CalloutAdvisory = "911 Caller reports multiple individuals dressed as clowns behaving aggressively.";
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_MULTIPLE_INJURIES_01 IN_OR_ON_POSITION", CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_99");
+
+            if (Settings.UseBluelineAudio)
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_2_45_01 IN_OR_ON_POSITION", CalloutPosition);
+            }
+            else
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_CRIME_CRIMINAL_ACTIVITY_05 IN_OR_ON_POSITION", CalloutPosition);
+            }
+
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_99_03");
 
             return base.OnBeforeCalloutDisplayed();
         }

@@ -30,8 +30,17 @@ namespace CampusCallouts.Callouts
             // LSPDFR
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_ASSAULT_ON_A_CIVILIAN_01 IN_OR_ON_POSITION", CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_3");
+
+            if (Settings.UseBluelineAudio)
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_2_40_01 IN_OR_ON_POSITION", CalloutPosition);
+            }
+            else
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_CRIME_ASSAULT_01 IN_OR_ON_POSITION", CalloutPosition);
+            }
+
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_03_02");
 
             //Create Callout message
             CalloutMessage = "Students Fighting";

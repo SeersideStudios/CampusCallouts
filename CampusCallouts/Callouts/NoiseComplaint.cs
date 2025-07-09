@@ -59,7 +59,16 @@ namespace CampusCallouts.Callouts
             //LSPDFR
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_CIVIL_DISTURBANCE_01 IN_OR_ON_POSITION", CalloutPosition);
+
+
+            if (Settings.UseBluelineAudio)
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("POSSIBLE_DISTURBANCE IN_OR_ON_POSITION", CalloutPosition);
+            }
+            else
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_POSSIBLE_DISTURBANCE IN_OR_ON_POSITION", CalloutPosition);
+            }
 
             //Create Callout message
             CalloutMessage = "Noise Complaint";

@@ -43,8 +43,17 @@ namespace CampusCallouts.Callouts
             if (Main.CalloutInterface) CalloutInterfaceAPI.Functions.SendMessage(this, "A suspect is said to have been trespassing at the Track field at ULSA.");
             CalloutMessage = "Trespasser";
             CalloutAdvisory = "A suspect is said to have been trespassing at the Track field at ULSA.";
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_TRESPASSING_01 IN_OR_ON_POSITION", CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
+
+            if (Settings.UseBluelineAudio)
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_CIVILIAN_NEEDING_ASSISTANCE_01 IN_OR_ON_POSITION", CalloutPosition);
+            }
+            else
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_CITIZENS_REPORT CC_CRIME_TRESPASSING_01 IN_OR_ON_POSITION", CalloutPosition);
+            }
+
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_02_02");
 
             return base.OnBeforeCalloutDisplayed();
         }

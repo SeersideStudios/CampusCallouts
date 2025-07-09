@@ -4,6 +4,7 @@ using LSPD_First_Response.Mod.Callouts;
 using Rage;
 using System;
 using System.Drawing;
+using System.IO;
 
 namespace CampusCallouts.Callouts
 {
@@ -43,8 +44,18 @@ namespace CampusCallouts.Callouts
             AddMinimumDistanceCheck(20f, CalloutPosition);
             CalloutMessage = "Reports of a Drone";
             CalloutAdvisory = "911 Caller reports of a Drone flying around Campus.";
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_SUSPICIOUS_ACTIVITY_01 IN_OR_ON_POSITION", CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
+
+            if (Settings.UseBluelineAudio)
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_DISTURBANCE_04 IN_OR_ON_POSITION", CalloutPosition);
+            }
+            else
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_CRIME_CIVIL_DISTURBANCE IN_OR_ON_POSITION", CalloutPosition); 
+            }
+
+
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_02_02");
 
             return base.OnBeforeCalloutDisplayed();
         }

@@ -125,8 +125,17 @@ namespace CampusCallouts
             if (Settings.ini.Exists()) { Game.LogTrivial("CampusCallout.ini is installed."); }
             else { Game.LogTrivial("CampusCallouts.ini is NOT installed"); }
 
-                //Register Callouts Here
-                Game.LogTrivial("Started Registering Callouts.");
+            //Checks for BluelineAudio Preference
+            if (Settings.UseBluelineAudio) {                 
+                Game.LogTrivial("CampusCallouts: Using BluelineAudio for Callouts.");
+            }
+            else
+            {
+                Game.LogTrivial("CampusCallouts: Using LSPDFR/CC Audio for Callouts.");
+            }
+
+            //Register Callouts Here
+            Game.LogTrivial("Started Registering Callouts.");
             if (Settings.UnderageDrinking || !Settings.ini.Exists())  Functions.RegisterCallout(typeof(Callouts.UnderageDrinking)); 
             if (Settings.StudentsFighting || !Settings.ini.Exists())  Functions.RegisterCallout(typeof(Callouts.StudentsFighting)); 
             if (Settings.NoiseComplaint || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.NoiseComplaint));

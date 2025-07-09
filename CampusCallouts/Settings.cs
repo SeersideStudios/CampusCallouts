@@ -25,5 +25,8 @@ namespace CampusCallouts
         public static readonly Keys DialogueKey = ini.ReadEnum("Keybinds", "DialogueKey", Keys.Y);
         public static readonly Keys EndCallout = ini.ReadEnum("Keybinds", "EndCallout", Keys.End);
 
+        //Preferences
+        public static readonly bool UseBluelineAudio = ini.ReadBoolean("Preferences", "UseBluelineDispatchAudio", false);
+
     }
 }

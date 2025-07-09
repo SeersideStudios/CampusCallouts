@@ -72,8 +72,17 @@ namespace CampusCallouts.Callouts
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
             CalloutMessage = "Hit and Run";
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_HIT_AND_RUN_01 IN_OR_ON_POSITION", CalloutPosition);
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("RESPOND_CODE_2");
+
+            if (Settings.UseBluelineAudio)
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("CRIME_PED_STRUCK_BY_VEHICLE_03");
+            }
+            else
+            {
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_CRIME_HIT_AND_RUN_01 IN_OR_ON_POSITION", CalloutPosition);
+            }
+
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_02_02");
 
 
             return base.OnBeforeCalloutDisplayed();
