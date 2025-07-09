@@ -224,7 +224,7 @@ namespace CampusCallouts.Callouts
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
             if (Drone.Exists()) { Drone.Delete(); }
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             Game.LogTrivial("CampusCallouts - Drone Use - Callout cleaned up.");
         }
     }

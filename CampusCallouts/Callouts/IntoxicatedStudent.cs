@@ -231,7 +231,7 @@ namespace CampusCallouts.Callouts
             if (attackerBlip3.Exists()) attackerBlip3.Delete();
 
 
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             Game.LogTrivial("CampusCallouts - IntoxicatedStudent - Callout cleaned up.");
         }
     }

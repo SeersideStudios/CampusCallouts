@@ -161,7 +161,7 @@ namespace CampusCallouts.Callouts
             base.End();
             if (Ped1.Exists()) { Ped1.Dismiss(); }
             if (DrivewayBlip.Exists()) { DrivewayBlip.Delete(); }
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             CalloutInterfaceAPI.Functions.SendMessage(this, "Noise complaint resolved. Units are Code 4.");
         }
     }

@@ -328,7 +328,7 @@ namespace CampusCallouts.Callouts
         public override void End()
         {
             base.End();
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (Suspect.Exists()) { Suspect.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }

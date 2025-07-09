@@ -129,7 +129,7 @@ namespace CampusCallouts.Callouts
                 CalloutInterfaceAPI.Functions.SendMessage(this, "Escort complete. Student safely arrived at their destination.");
                 Ped.Dismiss();
                 Car.Dismiss();
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
                 this.End();
             }
 

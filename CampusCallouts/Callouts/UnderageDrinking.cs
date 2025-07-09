@@ -131,7 +131,7 @@ namespace CampusCallouts.Callouts
             base.End();
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             CalloutInterfaceAPI.Functions.SendMessage(this, "The underage drinking incident has been resolved. No further action required. Code 4.");
         }
     }

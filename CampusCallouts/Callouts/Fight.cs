@@ -128,7 +128,7 @@ namespace CampusCallouts.Callouts
             if (PedBlip.Exists()) { PedBlip.Delete(); }
             if (Ped2.Exists()) { Ped2.Dismiss(); }
             if (PedBlip2.Exists()) { PedBlip2.Delete(); }
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             CalloutInterfaceAPI.Functions.SendMessage(this, "Situation handled. Both individuals are no longer a threat. Code 4.");
         }
     }

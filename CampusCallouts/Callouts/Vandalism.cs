@@ -178,7 +178,7 @@ namespace CampusCallouts.Callouts
             if (Suspect.Exists()) Suspect.Dismiss();
             if (SuspectBlip.Exists()) SuspectBlip.Delete();
 
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             Game.LogTrivial("CampusCallouts - Vandalism - Callout cleaned up.");
         }
     }

@@ -117,7 +117,7 @@ namespace CampusCallouts.Callouts
             base.End();
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
-            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("WE_ARE_CODE FOUR");
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             Game.LogTrivial("CampusCallouts - WeaponViolation callout cleaned up.");
         }
 
