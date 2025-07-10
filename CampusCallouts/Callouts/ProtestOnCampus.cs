@@ -69,7 +69,7 @@ namespace CampusCallouts.Callouts
             Game.LogTrivial($"CampusCallouts - Protest - Scenario selected: {scenarioOption}");
 
             // Fixed coordinates
-            Vector3 protestorCenter = new Vector3(-1599.821f, 236.175f, 59.26709f);
+            Vector3 protestorCenter = new Vector3(-1610.732f, 231.8715f, 59.78891f);
             Vector3 deanPos = new Vector3(-1622.43f, 227.5778f, 60.26468f);
             float deanHeading = 289.4158f;
 
@@ -78,10 +78,9 @@ namespace CampusCallouts.Callouts
             for (int i = 0; i < totalProtestors; i++)
             {
                 Vector3 pos = protestorCenter.Around2D(4f); // 4-meter radius
-                float headingToDean = GetHeadingTo(pos, deanPos);
                 string modelName = protestorModels[rand.Next(protestorModels.Count)];
 
-                Ped protestor = new Ped(modelName, pos, headingToDean);
+                Ped protestor = new Ped(modelName, pos, 108.7844f);
                 protestor.MakePersistent();
                 protestor.BlockPermanentEvents = true;
                 protestor.Tasks.PlayAnimation("missheistdockssetup1leadinoutig_1", "lsdh_ig_1_argue_les", 1f, AnimationFlags.Loop);
@@ -89,9 +88,9 @@ namespace CampusCallouts.Callouts
             }
 
             // Spawn Dean and Teachers at precise positions and heading
-            Dean = new Ped("IG_Weiss", deanPos, deanHeading);
-            Teacher1 = new Ped("CSB_TalMM", new Vector3(-1623.5f, 228.0f, 60.26468f), deanHeading);
-            Teacher2 = new Ped("IG_DJTalAurelia", new Vector3(-1621.2f, 227.0f, 60.26468f), deanHeading);
+            Dean = new Ped("A_M_M_Business_01", deanPos, deanHeading);
+            Teacher1 = new Ped("A_M_Y_Business_01", new Vector3(-1623.5f, 228.0f, 60.26468f), deanHeading);
+            Teacher2 = new Ped("A_F_Y_Business_03", new Vector3(-1621.2f, 227.0f, 60.26468f), deanHeading);
 
             foreach (Ped staff in new[] { Dean, Teacher1, Teacher2 })
             {
@@ -146,15 +145,15 @@ namespace CampusCallouts.Callouts
 
             if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 15f)
             {
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("CC_PROTEST");
                 DeanBlip.DisableRoute();
                 OnScene = true;
                 Dean.Face(Game.LocalPlayer.Character);
                 Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to speak to the Dean.");
 
                 // Play protest audio
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_PROTEST", ProtestLocation);
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("CC_PROTEST_AUDIO");
             }
+
 
             if (OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 4f && Game.IsKeyDown(Settings.DialogueKey) && !EscortStarted)
             {
@@ -197,12 +196,6 @@ namespace CampusCallouts.Callouts
                     return;
             }
             DialogueStep++;
-        }
-
-        private float GetHeadingTo(Vector3 from, Vector3 to)
-        {
-            Vector3 dir = to - from;
-            return (float)(Math.Atan2(dir.Y, dir.X) * (180.0 / Math.PI));
         }
 
 
