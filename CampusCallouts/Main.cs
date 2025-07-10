@@ -11,7 +11,7 @@ namespace CampusCallouts
     public class Main : Plugin
     {
         public static Version ClientVersion = new Version();
-        public static Version curVersion = new Version("1.0.0");
+        public static Version curVersion = new Version("0.5.0");
 
         public static bool UpToDate;
         public static bool CalloutInterface;

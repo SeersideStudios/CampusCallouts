@@ -11,14 +11,16 @@ namespace CampusCallouts.Callouts
     public class SchoolShooter : Callout
     {
         private Ped Shooter;
+
         private Blip ShooterBlip;
+
         private Vector3 SpawnPoint;
+
         private bool CombatStarted = false;
-        private bool OnScene = false;
 
         public override bool OnBeforeCalloutDisplayed()
         {
-            SpawnPoint = new Vector3(-1650f, 210f, 60.6f); // Set near a quad or open space
+            SpawnPoint = new Vector3(-1650f, 210f, 60.6f); 
 
             CalloutPosition = SpawnPoint;
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 40f);
@@ -28,9 +30,9 @@ namespace CampusCallouts.Callouts
             CalloutAdvisory = "911 Caller reports gunfire on the ULSA campus.";
 
             if (Settings.UseBluelineAudio)
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_ACTIVE_SHOOTER IN_OR_ON_POSITION", CalloutPosition);
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_SHOTS_FIRED_02 IN_OR_ON_POSITION", CalloutPosition);
             else
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_CRIME_SHOTS_FIRED_01 IN_OR_ON_POSITION", CalloutPosition);
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_A_WEAPONS_INCIDENT_SHOTS_FIRED IN_OR_ON_POSITION", CalloutPosition);
 
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_99_03");
 
@@ -94,7 +96,6 @@ namespace CampusCallouts.Callouts
                 CombatStarted = true;
                 Shooter.Tasks.FightAgainstClosestHatedTarget(50f); // medium range, allows chasing but not across map
                 Game.LogTrivial("CampusCallouts - SchoolShooter - Shooter has engaged.");
-                OnScene = true;
                 ShooterBlip.DisableRoute();
                 Game.DisplayHelp("Press " + Settings.EndCallout + "~w~ to end the call.");
             }
