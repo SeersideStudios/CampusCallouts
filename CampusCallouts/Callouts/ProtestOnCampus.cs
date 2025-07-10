@@ -176,7 +176,7 @@ namespace CampusCallouts.Callouts
                 OnScene = true;
                 Dean.Face(Game.LocalPlayer.Character);
                 DeanBlip.DisableRoute();
-                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to speak to the Dean.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
 
                 // Play custom protest music
                 Game.LogTrivial("CampusCallouts - Checking protest audio at: " + protestMusicPath);
@@ -231,7 +231,7 @@ namespace CampusCallouts.Callouts
                 End();
             }
 
-            if (Game.IsKeyDown(Settings.EndCallout))
+            if (Game.IsKeyDown(Settings.EndCallout) || Dean.IsDead)
             {
                 End();
             }

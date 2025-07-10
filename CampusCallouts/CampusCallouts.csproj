@@ -79,6 +79,7 @@
     <Compile Include="Callouts\HitAndRun.cs" />
     <Compile Include="Callouts\IntoxicatedStudent.cs" />
     <Compile Include="Callouts\KillerClown.cs" />
+    <Compile Include="Callouts\MissingStudent.cs" />
     <Compile Include="Callouts\NoiseComplaint.cs" />
     <Compile Include="Callouts\ProtestOnCampus.cs" />
     <Compile Include="Callouts\SchoolShooter.cs" />
