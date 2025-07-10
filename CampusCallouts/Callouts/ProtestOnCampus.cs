@@ -132,6 +132,7 @@ namespace CampusCallouts.Callouts
 
             if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 15f)
             {
+                protestAudioLooping = true;
                 StartProtestAudioLoop();
                 DeanBlip.DisableRoute();
                 OnScene = true;
@@ -151,7 +152,6 @@ namespace CampusCallouts.Callouts
             if (EscortStarted && Game.LocalPlayer.Character.Position.DistanceTo(DeanDestination) < 3f)
             {
                 routeBlip.DisableRoute();
-                routeBlip.Delete();
                 Game.DisplayNotification("Dean has been escorted to safety. Situation under control.");
                 CalloutInterfaceAPI.Functions.SendMessage(this, "Dean escorted successfully. Callout ended.");
                 End();
