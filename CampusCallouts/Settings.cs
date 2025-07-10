@@ -20,6 +20,7 @@ namespace CampusCallouts
         public static readonly bool Vandalism = ini.ReadBoolean("Callouts", "Vandalism", true);
         public static readonly bool IntoxicatedStudent = ini.ReadBoolean("Callouts", "IntoxicatedStudent", true);
         public static readonly bool KillerClown = ini.ReadBoolean("Callouts", "KillerClown", true);
+        public static readonly bool SchoolShooter = ini.ReadBoolean("Callouts", "SchoolShooter", true);
 
         //Keybinds 
         public static readonly Keys DialogueKey = ini.ReadEnum("Keybinds", "DialogueKey", Keys.Y);
