@@ -36,16 +36,13 @@ namespace CampusCallouts.Callouts
         private Blip DeanBlip;
         private Blip routeBlip;
         private Vector3 ProtestLocation = new Vector3(-1650f, 215f, 60.5f);
-        private Vector3 DeanDestination = new Vector3(-1670f, 245f, 61f);
+        private Vector3 DeanDestination = new Vector3(-1708.795f, 77.58182f, 65.76763f);
 
         private Random rand = new Random();
         private int scenarioOption;
         private bool OnScene = false;
-        private bool DialogueStarted = false;
         private int DialogueStep = 0;
         private bool EscortStarted = false;
-
-        private bool protestAudioLooping = false;
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -71,46 +68,63 @@ namespace CampusCallouts.Callouts
             scenarioOption = rand.Next(1, 4); // 1, 2, or 3
             Game.LogTrivial($"CampusCallouts - Protest - Scenario selected: {scenarioOption}");
 
+            // Fixed coordinates
+            Vector3 protestorCenter = new Vector3(-1599.821f, 236.175f, 59.26709f);
+            Vector3 deanPos = new Vector3(-1622.43f, 227.5778f, 60.26468f);
+            float deanHeading = 289.4158f;
+
             // Spawn Protestors
             int totalProtestors = rand.Next(10, 21); // 10 to 20 protestors
-
             for (int i = 0; i < totalProtestors; i++)
             {
-                Vector3 pos = ProtestLocation.Around2D(5f);
+                Vector3 pos = protestorCenter.Around2D(4f); // 4-meter radius
+                float headingToDean = GetHeadingTo(pos, deanPos);
                 string modelName = protestorModels[rand.Next(protestorModels.Count)];
 
-                Ped protestor = new Ped(modelName, pos, rand.Next(0, 360));
+                Ped protestor = new Ped(modelName, pos, headingToDean);
                 protestor.MakePersistent();
                 protestor.BlockPermanentEvents = true;
-                protestor.Tasks.PlayAnimation("anim@amb@casino@brawl@fights@argue@", "argument_loop_mp_m_brawler_01", 1f, AnimationFlags.Loop);
+                protestor.Tasks.PlayAnimation("missheistdockssetup1leadinoutig_1", "lsdh_ig_1_argue_les", 1f, AnimationFlags.Loop);
                 Protestors.Add(protestor);
             }
 
+            // Spawn Dean and Teachers at precise positions and heading
+            Dean = new Ped("IG_Weiss", deanPos, deanHeading);
+            Teacher1 = new Ped("CSB_TalMM", new Vector3(-1623.5f, 228.0f, 60.26468f), deanHeading);
+            Teacher2 = new Ped("IG_DJTalAurelia", new Vector3(-1621.2f, 227.0f, 60.26468f), deanHeading);
 
-            // Spawn staff
-            Teacher1 = SpawnPed("cs_bankman", ProtestLocation + new Vector3(1f, -2f, 0f));
-            Teacher2 = SpawnPed("cs_priest", ProtestLocation + new Vector3(-1f, -2f, 0f));
-            Dean = SpawnPed("csb_prolsec", ProtestLocation + new Vector3(0f, -3f, 0f));
+            foreach (Ped staff in new[] { Dean, Teacher1, Teacher2 })
+            {
+                staff.MakePersistent();
+                staff.BlockPermanentEvents = true;
+            }
 
+            // Blip for the Dean
             DeanBlip = Dean.AttachBlip();
             DeanBlip.Color = Color.Blue;
             DeanBlip.EnableRoute(Color.Blue);
 
-            // Add cones
-            Vector3 coneBase = ProtestLocation + new Vector3(0f, -1.5f, 0f);
-            for (int i = -2; i <= 2; i++)
+            // Add cones — aligned with heading 292.9514
+            Vector3 baseCone = new Vector3(-1617.84f, 231.3084f, 60.01756f);
+            float headingRad = 292.9514f * (float)Math.PI / 180f;
+            Vector3 rightOffset = new Vector3((float)Math.Cos(headingRad), (float)Math.Sin(headingRad), 0f);
+
+            for (int i = -1; i <= 1; i++)
             {
-                var cone = new Rage.Object("prop_roadcone02b", coneBase + new Vector3(i * 0.75f, 0, 0));
+                Vector3 conePos = baseCone + rightOffset * (i * 0.75f);
+                var cone = new Rage.Object("prop_roadcone02b", conePos);
                 cone.MakePersistent();
                 Cones.Add(cone);
             }
 
+            // Callout Interface message
             if (Main.CalloutInterface)
                 CalloutInterfaceAPI.Functions.SendMessage(this, "Protest at ULSA campus reported. Staff are concerned about safety. Respond to scene.");
 
             Game.DisplayHelp("Respond to the protest location and speak to the Dean.");
             return base.OnCalloutAccepted();
         }
+
 
         public override void OnCalloutNotAccepted()
         {
@@ -132,8 +146,7 @@ namespace CampusCallouts.Callouts
 
             if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 15f)
             {
-                protestAudioLooping = true;
-                StartProtestAudioLoop();
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("CC_PROTEST");
                 DeanBlip.DisableRoute();
                 OnScene = true;
                 Dean.Face(Game.LocalPlayer.Character);
@@ -185,6 +198,13 @@ namespace CampusCallouts.Callouts
             }
             DialogueStep++;
         }
+
+        private float GetHeadingTo(Vector3 from, Vector3 to)
+        {
+            Vector3 dir = to - from;
+            return (float)(Math.Atan2(dir.Y, dir.X) * (180.0 / Math.PI));
+        }
+
 
         private void HandleScenario()
         {
@@ -239,23 +259,10 @@ namespace CampusCallouts.Callouts
             return p;
         }
 
-        private void StartProtestAudioLoop()
-        {
-            GameFiber.StartNew(delegate
-            {
-                while (protestAudioLooping)
-                {
-                    LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_PROTEST", ProtestLocation);
-                    GameFiber.Sleep(32000); // Play every 32 seconds (Audio Clip Length)
-                }
-            }, "ProtestAudioLoop");
-        }
-
 
         public override void End()
         {
             base.End();
-            protestAudioLooping = false;
             foreach (var p in Protestors) if (p.Exists()) p.Dismiss();
             foreach (var h in Hostiles) if (h.Exists()) h.Dismiss();
             foreach (var c in Cones) if (c.Exists()) c.Delete();

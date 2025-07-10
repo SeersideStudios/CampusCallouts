@@ -149,6 +149,7 @@ namespace CampusCallouts
             if (Settings.IntoxicatedStudent || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.IntoxicatedStudent));
             if (Settings.KillerClown || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.KillerClown));
             if (Settings.SchoolShooter || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.SchoolShooter));
+            if (Settings.ProtestOnCampus || !Settings.ini.Exists()) Functions.RegisterCallout(typeof(Callouts.ProtestOnCampus));
             Game.LogTrivial("====================CAMPUSCALLOUTS CALLOUTS REGISTRATION====================");
             
         }
