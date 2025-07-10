@@ -61,14 +61,23 @@ namespace CampusCallouts.Callouts
             {
                 try
                 {
-                    if (allPeds[i].Exists() && allPeds[i] != Shooter && allPeds[i] != Game.LocalPlayer.Character)
-                    {
-                        Shooter.RelationshipGroup.SetRelationshipWith(allPeds[i].RelationshipGroup, Relationship.Hate);
-                    }
-                }
-                catch { break; }
+                    Ped civ = allPeds[i];
+                    if (!civ.Exists() || civ == Shooter || civ == Game.LocalPlayer.Character || !civ.IsHuman || civ.IsPlayer || civ.RelationshipGroup == RelationshipGroup.Cop)
+                        continue;
 
-                GameFiber.Yield();
+                    // Mutual hate
+                    Shooter.RelationshipGroup.SetRelationshipWith(civ.RelationshipGroup, Relationship.Hate);
+                    civ.RelationshipGroup.SetRelationshipWith(Shooter.RelationshipGroup, Relationship.Hate);
+
+                    // Panic & flee
+                    civ.Tasks.ReactAndFlee(Shooter);
+                }
+                catch
+                {
+                    break;
+                }
+
+                GameFiber.Yield(); // helps prevent freezing on large ped scans
             }
 
             // Blip
