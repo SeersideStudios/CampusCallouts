@@ -10,8 +10,8 @@ namespace CampusCallouts
 {
     public class Main : Plugin
     {
-        public static Version ClientVersion = new Version();
-        public static Version curVersion = new Version("0.5.0");
+        public static Version LatestVersion = new Version();
+        public static Version UserVersion = new Version("0.5.0");
 
         public static bool UpToDate;
         public static bool CalloutInterface;
@@ -22,7 +22,7 @@ namespace CampusCallouts
             try
             {
                 Functions.OnOnDutyStateChanged += OnOnDutyStateChangedHandler;
-                Game.LogTrivial("CampusCallouts: Campus Callouts version " + curVersion + " has been loaded.");
+                Game.LogTrivial("CampusCallouts: Campus Callouts version " + UserVersion + " has been loaded.");
             }
             catch (Exception ex)
             {
@@ -40,7 +40,7 @@ namespace CampusCallouts
             // Huge Thanks to Yob1n for this section of the code
                 if (OnDuty)
                 {
-                    int num = (int)Game.DisplayNotification("3dtextures", "mpgroundlogo_cops", "Campus Callouts", "~y~v." + curVersion + " ~b~by Seerside Studios", " ~g~Loaded Successfully. ~b~Have a good day at School!");
+                    int num = (int)Game.DisplayNotification("3dtextures", "mpgroundlogo_cops", "Campus Callouts", "~y~v." + UserVersion + " ~b~by Seerside Studios", " ~g~Loaded Successfully. ~b~Have a good day at School!");
                     GameFiber.StartNew(delegate
                     {
                         Game.LogTrivial("CampusCallouts: Player Went on Duty. Checking for Updates.");
@@ -54,7 +54,7 @@ namespace CampusCallouts
                                     {
                                         string s = client.DownloadString("https://raw.githubusercontent.com/SeersideStudios/CampusCallouts/refs/heads/master/version.txt");
 
-                                        ClientVersion = new Version(s);
+                                        LatestVersion = new Version(s);
                                     }
                                     catch (Exception) { Game.LogTrivial("CampusCallouts: GitHub version link down. Version UNVERIFIED."); }
                                 }
@@ -67,17 +67,17 @@ namespace CampusCallouts
                                     GameFiber.Yield();
                                 }
                                 // compare the versions  
-                                if (curVersion.CompareTo(ClientVersion) < 0)
+                                if (UserVersion.CompareTo(LatestVersion) < 0)
                                 {
                                     Game.LogTrivial("CampusCallouts: Finished Checking Campus Callouts for Updates.");
-                                    Game.LogTrivial("CampusCallouts: Update Available for Campus Callouts. Installed Version " + curVersion + " ,New Version " + ClientVersion);
-                                    Game.DisplayNotification("~g~Update Available~w~ for ~b~CampusCallouts! It is ~y~Strongly Recommended~w~ to~g~ Update~b~ CampusCallouts. ~w~Playing on an Old Version ~r~May Cause Issues.");
+                                    Game.LogTrivial("CampusCallouts: Update Available for Campus Callouts. Installed Version " + UserVersion + " ,New Version " + LatestVersion);
+                                    Game.DisplayNotification("~r~IMPORTANT:~w~ A new version of ~b~CampusCallouts~w~ is available.\n\n~y~Installed:~w~ v" + UserVersion + "\n~y~Latest:~w~ v" + LatestVersion + "\n\n~r~Please update to ensure optimal performance and prevent issues.");
                                     Game.LogTrivial("====================CAMPUSCALLOUTS WARNING====================");
                                     Game.LogTrivial("Outdated CampusCallouts Version. Please update as soon as possible for the best compatibility!");
                                     Game.LogTrivial("====================CAMPUSCALLOUTS WARNING====================");
                                     UpToDate = false;
                                 }
-                                else if (curVersion.CompareTo(ClientVersion) > 0)
+                                else if (UserVersion.CompareTo(LatestVersion) > 0)
                                 {
                                     Game.LogTrivial("CampusCallouts: DETECTED BETA RELEASE. DO NOT REDISTRIBUTE. PLEASE REPORT ALL ISSUES.");
                                     Game.DisplayNotification("CampusCallouts: ~r~DETECTED BETA RELEASE. ~w~DO NOT REDISTRIBUTE. PLEASE REPORT ALL ISSUES.");
