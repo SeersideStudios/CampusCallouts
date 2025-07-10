@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("[CC] Killer Clown Sighting", CalloutProbability.Medium, "911 Caller reports multiple individuals dressed as clowns behaving aggressively.", "Code 3", "ULSAPD")]
+    [CalloutInterface("[CC] Killer Clown Sighting", CalloutProbability.Medium, "911 Caller reports multiple individuals dressed as clowns behaving aggressively.", "Code 99", "ULSAPD")]
     public class KillerClown : Callout
     {
         // Private References

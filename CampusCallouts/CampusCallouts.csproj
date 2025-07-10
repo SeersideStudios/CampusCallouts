@@ -80,6 +80,7 @@
     <Compile Include="Callouts\IntoxicatedStudent.cs" />
     <Compile Include="Callouts\KillerClown.cs" />
     <Compile Include="Callouts\NoiseComplaint.cs" />
+    <Compile Include="Callouts\ProtestOnCampus.cs" />
     <Compile Include="Callouts\SchoolShooter.cs" />
     <Compile Include="Callouts\Stalking.cs" />
     <Compile Include="Callouts\StudentEscort.cs" />

@@ -1,0 +1,271 @@
+﻿using CalloutInterfaceAPI;
+using LSPD_First_Response.Mod.API;
+using LSPD_First_Response.Mod.Callouts;
+using Rage;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+
+namespace CampusCallouts.Callouts
+{
+    [CalloutInterface("[CC] Protest on Campus", CalloutProbability.Medium, "ULSA staff report a large group of students protesting. Situation may escalate.", "Code 3", "ULSAPD")]
+    public class ProtestOnCampus : Callout
+    {
+        private List<Ped> Protestors = new List<Ped>();
+        private List<Ped> Hostiles = new List<Ped>();
+        private List<Rage.Object> Cones = new List<Rage.Object>();
+        List<string> protestorModels = new List<string>
+{
+    "a_m_y_soucent_01",
+    "a_m_y_beachvesp_01",
+    "a_f_y_hipster_01",
+    "a_f_y_bevhills_01",
+    "a_m_y_hipster_01",
+    "a_f_y_eastsa_01",
+    "a_f_y_soucent_01",
+    "a_m_y_skater_01",
+    "a_m_y_genstreet_01",
+    "a_f_y_vinewood_01"
+};
+
+
+        private Ped Teacher1;
+        private Ped Teacher2;
+        private Ped Dean;
+
+        private Blip DeanBlip;
+        private Blip routeBlip;
+        private Vector3 ProtestLocation = new Vector3(-1650f, 215f, 60.5f);
+        private Vector3 DeanDestination = new Vector3(-1670f, 245f, 61f);
+
+        private Random rand = new Random();
+        private int scenarioOption;
+        private bool OnScene = false;
+        private bool DialogueStarted = false;
+        private int DialogueStep = 0;
+        private bool EscortStarted = false;
+
+        private bool protestAudioLooping = false;
+
+        public override bool OnBeforeCalloutDisplayed()
+        {
+            CalloutPosition = ProtestLocation;
+            ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
+            AddMinimumDistanceCheck(20f, CalloutPosition);
+
+            CalloutMessage = "Protest on Campus";
+            CalloutAdvisory = "ULSA staff report a large group of students protesting. Situation may escalate.";
+
+            if (Settings.UseBluelineAudio)
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("POSSIBLE_DISTURBANCE IN_OR_ON_POSITION", CalloutPosition);
+            else
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_POSSIBLE_DISTURBANCE IN_OR_ON_POSITION", CalloutPosition);
+
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_03_02");
+
+            return base.OnBeforeCalloutDisplayed();
+        }
+
+        public override bool OnCalloutAccepted()
+        {
+            scenarioOption = rand.Next(1, 4); // 1, 2, or 3
+            Game.LogTrivial($"CampusCallouts - Protest - Scenario selected: {scenarioOption}");
+
+            // Spawn Protestors
+            int totalProtestors = rand.Next(10, 21); // 10 to 20 protestors
+
+            for (int i = 0; i < totalProtestors; i++)
+            {
+                Vector3 pos = ProtestLocation.Around2D(5f);
+                string modelName = protestorModels[rand.Next(protestorModels.Count)];
+
+                Ped protestor = new Ped(modelName, pos, rand.Next(0, 360));
+                protestor.MakePersistent();
+                protestor.BlockPermanentEvents = true;
+                protestor.Tasks.PlayAnimation("anim@amb@casino@brawl@fights@argue@", "argument_loop_mp_m_brawler_01", 1f, AnimationFlags.Loop);
+                Protestors.Add(protestor);
+            }
+
+
+            // Spawn staff
+            Teacher1 = SpawnPed("cs_bankman", ProtestLocation + new Vector3(1f, -2f, 0f));
+            Teacher2 = SpawnPed("cs_priest", ProtestLocation + new Vector3(-1f, -2f, 0f));
+            Dean = SpawnPed("csb_prolsec", ProtestLocation + new Vector3(0f, -3f, 0f));
+
+            DeanBlip = Dean.AttachBlip();
+            DeanBlip.Color = Color.Blue;
+            DeanBlip.EnableRoute(Color.Blue);
+
+            // Add cones
+            Vector3 coneBase = ProtestLocation + new Vector3(0f, -1.5f, 0f);
+            for (int i = -2; i <= 2; i++)
+            {
+                var cone = new Rage.Object("prop_roadcone02b", coneBase + new Vector3(i * 0.75f, 0, 0));
+                cone.MakePersistent();
+                Cones.Add(cone);
+            }
+
+            if (Main.CalloutInterface)
+                CalloutInterfaceAPI.Functions.SendMessage(this, "Protest at ULSA campus reported. Staff are concerned about safety. Respond to scene.");
+
+            Game.DisplayHelp("Respond to the protest location and speak to the Dean.");
+            return base.OnCalloutAccepted();
+        }
+
+        public override void OnCalloutNotAccepted()
+        {
+            base.OnCalloutNotAccepted();
+            foreach (var p in Protestors) if (p.Exists()) p.Dismiss();
+            foreach (var h in Hostiles) if (h.Exists()) h.Dismiss();
+            foreach (var c in Cones) if (c.Exists()) c.Delete();
+            if (Teacher1.Exists()) Teacher1.Dismiss();
+            if (Teacher2.Exists()) Teacher2.Dismiss();
+            if (Dean.Exists()) Dean.Dismiss();
+            if (DeanBlip.Exists()) DeanBlip.Delete();
+            if (routeBlip.Exists()) routeBlip.Delete();
+
+        }
+
+        public override void Process()
+        {
+            base.Process();
+
+            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 15f)
+            {
+                StartProtestAudioLoop();
+                DeanBlip.DisableRoute();
+                OnScene = true;
+                Dean.Face(Game.LocalPlayer.Character);
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to speak to the Dean.");
+
+                // Play protest audio
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_PROTEST", ProtestLocation);
+            }
+
+            if (OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 4f && Game.IsKeyDown(Settings.DialogueKey) && !EscortStarted)
+            {
+                RunDialogue();
+                GameFiber.Sleep(300); // debounce
+            }
+
+            if (EscortStarted && Game.LocalPlayer.Character.Position.DistanceTo(DeanDestination) < 3f)
+            {
+                routeBlip.DisableRoute();
+                routeBlip.Delete();
+                Game.DisplayNotification("Dean has been escorted to safety. Situation under control.");
+                CalloutInterfaceAPI.Functions.SendMessage(this, "Dean escorted successfully. Callout ended.");
+                End();
+            }
+
+            if (Game.IsKeyDown(Settings.EndCallout))
+            {
+                End();
+            }
+        }
+
+        private void RunDialogue()
+        {
+            switch (DialogueStep)
+            {
+                case 0:
+                    Game.DisplaySubtitle("~b~Dean: ~w~Thank you for coming, officer.");
+                    break;
+                case 1:
+                    Game.DisplaySubtitle("~g~You: ~w~What’s going on here?");
+                    break;
+                case 2:
+                    Game.DisplaySubtitle("~b~Dean: ~w~It started as a peaceful protest, but we’re concerned about potential escalation.");
+                    break;
+                case 3:
+                    Game.DisplaySubtitle("~g~You: ~w~Understood. Let me assess the situation.");
+                    break;
+                case 4:
+                    HandleScenario();
+                    return;
+            }
+            DialogueStep++;
+        }
+
+        private void HandleScenario()
+        {
+            switch (scenarioOption)
+            {
+                case 1:
+                    Game.DisplaySubtitle("~b~Dean: ~w~Please escort me to a safe area.");
+                    Game.DisplayNotification("Escort the Dean to the safe location marked on your GPS.");
+                    EscortStarted = true;
+
+                    // Make dean follow the player
+                    Dean.Tasks.FollowToOffsetFromEntity(Game.LocalPlayer.Character, new Vector3(0.5f, 0.5f, 0f));
+
+                    // Create a route to the safe area
+                    routeBlip = new Blip(DeanDestination);
+                    routeBlip.Color = Color.Yellow;
+                    routeBlip.EnableRoute(Color.Yellow);
+                    routeBlip.IsRouteEnabled = true;
+                    routeBlip.Scale = 0.7f;
+                    break;
+
+                case 2:
+                    Game.DisplaySubtitle("~r~Protestor: ~w~You pigs don’t belong here!");
+                    Ped attacker = Protestors[rand.Next(Protestors.Count)];
+                    attacker.Tasks.FightAgainst(Game.LocalPlayer.Character);
+                    attacker.BlockPermanentEvents = false;
+                    Game.DisplayNotification("One protestor is becoming aggressive!");
+                    break;
+
+                case 3:
+                    int count = Math.Max(1, Protestors.Count / 5); // 5–20%
+                    Game.DisplayNotification($"{count} protestors are becoming aggressive!");
+                    for (int i = 0; i < count; i++)
+                    {
+                        Ped p = Protestors[rand.Next(Protestors.Count)];
+                        if (!Hostiles.Contains(p))
+                        {
+                            p.BlockPermanentEvents = false;
+                            p.Tasks.FightAgainst(Game.LocalPlayer.Character);
+                            Hostiles.Add(p);
+                        }
+                    }
+                    break;
+            }
+        }
+
+        private Ped SpawnPed(string model, Vector3 pos)
+        {
+            Ped p = new Ped(model, pos, rand.Next(0, 360));
+            p.MakePersistent();
+            p.BlockPermanentEvents = true;
+            return p;
+        }
+
+        private void StartProtestAudioLoop()
+        {
+            GameFiber.StartNew(delegate
+            {
+                while (protestAudioLooping)
+                {
+                    LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_PROTEST", ProtestLocation);
+                    GameFiber.Sleep(32000); // Play every 32 seconds (Audio Clip Length)
+                }
+            }, "ProtestAudioLoop");
+        }
+
+
+        public override void End()
+        {
+            base.End();
+            protestAudioLooping = false;
+            foreach (var p in Protestors) if (p.Exists()) p.Dismiss();
+            foreach (var h in Hostiles) if (h.Exists()) h.Dismiss();
+            foreach (var c in Cones) if (c.Exists()) c.Delete();
+            if (Teacher1.Exists()) Teacher1.Dismiss();
+            if (Teacher2.Exists()) Teacher2.Dismiss();
+            if (Dean.Exists()) Dean.Dismiss();
+            if (DeanBlip.Exists()) DeanBlip.Delete();
+            if (routeBlip.Exists()) routeBlip.Delete();
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
+            Game.LogTrivial("CampusCallouts - Protest - Callout cleaned up.");
+        }
+    }
+}
