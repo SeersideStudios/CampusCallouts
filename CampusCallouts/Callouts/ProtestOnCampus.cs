@@ -5,6 +5,7 @@ using Rage;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using WMPLib;
 
 namespace CampusCallouts.Callouts
 {
@@ -13,7 +14,6 @@ namespace CampusCallouts.Callouts
     {
         private List<Ped> Protestors = new List<Ped>();
         private List<Ped> Hostiles = new List<Ped>();
-        private List<Rage.Object> Cones = new List<Rage.Object>();
         List<string> protestorModels = new List<string>
 {
     "a_m_y_soucent_01",
@@ -43,6 +43,10 @@ namespace CampusCallouts.Callouts
         private bool OnScene = false;
         private int DialogueStep = 0;
         private bool EscortStarted = false;
+
+        private WindowsMediaPlayer protestPlayer;
+        private string protestMusicPath = @"Plugins\LSPDFR\audio\scanner\CampusCallouts - Audio\Protest\CC_PROTEST_AUDIO.mp3";
+
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -85,6 +89,7 @@ namespace CampusCallouts.Callouts
                 protestor.BlockPermanentEvents = true;
                 protestor.Tasks.PlayAnimation("missheistdockssetup1leadinoutig_1", "lsdh_ig_1_argue_les", 1f, AnimationFlags.Loop);
                 Protestors.Add(protestor);
+                GameFiber.Yield();
             }
 
             // Spawn Dean and Teachers at precise positions and heading
@@ -103,19 +108,6 @@ namespace CampusCallouts.Callouts
             DeanBlip.Color = Color.Blue;
             DeanBlip.EnableRoute(Color.Blue);
 
-            // Add cones — aligned with heading 292.9514
-            Vector3 baseCone = new Vector3(-1617.84f, 231.3084f, 60.01756f);
-            float headingRad = 292.9514f * (float)Math.PI / 180f;
-            Vector3 rightOffset = new Vector3((float)Math.Cos(headingRad), (float)Math.Sin(headingRad), 0f);
-
-            for (int i = -1; i <= 1; i++)
-            {
-                Vector3 conePos = baseCone + rightOffset * (i * 0.75f);
-                var cone = new Rage.Object("prop_roadcone02b", conePos);
-                cone.MakePersistent();
-                Cones.Add(cone);
-            }
-
             // Callout Interface message
             if (Main.CalloutInterface)
                 CalloutInterfaceAPI.Functions.SendMessage(this, "Protest at ULSA campus reported. Staff are concerned about safety. Respond to scene.");
@@ -130,7 +122,6 @@ namespace CampusCallouts.Callouts
             base.OnCalloutNotAccepted();
             foreach (var p in Protestors) if (p.Exists()) p.Dismiss();
             foreach (var h in Hostiles) if (h.Exists()) h.Dismiss();
-            foreach (var c in Cones) if (c.Exists()) c.Delete();
             if (Teacher1.Exists()) Teacher1.Dismiss();
             if (Teacher2.Exists()) Teacher2.Dismiss();
             if (Dean.Exists()) Dean.Dismiss();
@@ -145,13 +136,24 @@ namespace CampusCallouts.Callouts
 
             if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 15f)
             {
-                DeanBlip.DisableRoute();
                 OnScene = true;
                 Dean.Face(Game.LocalPlayer.Character);
+                DeanBlip.DisableRoute();
                 Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to speak to the Dean.");
 
-                // Play protest audio
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("CC_PROTEST_AUDIO");
+                // Play custom protest music
+                if (System.IO.File.Exists(protestMusicPath))
+                {
+                    protestPlayer = new WindowsMediaPlayer();
+                    protestPlayer.URL = protestMusicPath;
+                    protestPlayer.settings.setMode("loop", true); // Loop until stopped
+                    protestPlayer.controls.play();
+                    Game.LogTrivial("CampusCallouts - Protest music started.");
+                }
+                else
+                {
+                    Game.LogTrivial("CampusCallouts - Protest music file not found.");
+                }
             }
 
 
@@ -256,9 +258,15 @@ namespace CampusCallouts.Callouts
         public override void End()
         {
             base.End();
+            if (protestPlayer != null)
+            {
+                protestPlayer.controls.stop();
+                protestPlayer.close();
+                protestPlayer = null;
+                Game.LogTrivial("CampusCallouts - Protest music stopped.");
+            }
             foreach (var p in Protestors) if (p.Exists()) p.Dismiss();
             foreach (var h in Hostiles) if (h.Exists()) h.Dismiss();
-            foreach (var c in Cones) if (c.Exists()) c.Delete();
             if (Teacher1.Exists()) Teacher1.Dismiss();
             if (Teacher2.Exists()) Teacher2.Dismiss();
             if (Dean.Exists()) Dean.Dismiss();
