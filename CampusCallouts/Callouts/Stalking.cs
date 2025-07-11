@@ -38,7 +38,7 @@ namespace CampusCallouts.Callouts
 
             if (Settings.UseBluelineAudio)
             {
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("SUSPICIOUS_PERSON_02 IN_OR_ON_POSITION", CalloutPosition);
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("SUSPICIOUS_PERSON_02", CalloutPosition);
             }
             else
             {

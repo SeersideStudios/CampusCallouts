@@ -36,7 +36,7 @@ namespace CampusCallouts.Callouts
 
             if (Settings.UseBluelineAudio)
             {
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("POSSIBLE_DISTURBANCE IN_OR_ON_POSITION", CalloutPosition);
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("POSSIBLE_DISTURBANCE", CalloutPosition);
             }
             else
             {

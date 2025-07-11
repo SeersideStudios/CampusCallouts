@@ -67,7 +67,7 @@ namespace CampusCallouts.Callouts
             CalloutAdvisory = "A student has been reported missing by their roommate. Please investigate.";
 
             if (Settings.UseBluelineAudio)
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_CIVILIAN_REQUIRING_ASSISTANCE IN_OR_ON_POSITION", CalloutPosition);
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_CIVILIAN_REQUIRING_ASSISTANCE", CalloutPosition);
             else
                 LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_CRIME_CIVILIAN_NEEDING_ASSISTANCE_01 IN_OR_ON_POSITION", CalloutPosition);
 

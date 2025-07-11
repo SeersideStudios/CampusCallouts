@@ -53,7 +53,7 @@ namespace CampusCallouts.Callouts
 
             if (Settings.UseBluelineAudio)
             {
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_DISTURBING_THE_PEACE_02 IN_OR_ON_POSITION", CalloutPosition);
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_DISTURBING_THE_PEACE_02", CalloutPosition);
             }
             else
             {

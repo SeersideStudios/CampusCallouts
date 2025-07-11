@@ -30,7 +30,7 @@ namespace CampusCallouts.Callouts
             CalloutAdvisory = "911 Caller reports gunfire on the ULSA campus.";
 
             if (Settings.UseBluelineAudio)
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_SHOTS_FIRED_02 IN_OR_ON_POSITION", CalloutPosition);
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_SHOTS_FIRED_02", CalloutPosition);
             else
                 LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_A_WEAPONS_INCIDENT_SHOTS_FIRED IN_OR_ON_POSITION", CalloutPosition);
 

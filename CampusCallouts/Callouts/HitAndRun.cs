@@ -75,7 +75,7 @@ namespace CampusCallouts.Callouts
 
             if (Settings.UseBluelineAudio)
             {
-                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("CRIME_PED_STRUCK_BY_VEHICLE_03");
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_PED_STRUCK_BY_VEHICLE_03", CalloutPosition);
             }
             else
             {
