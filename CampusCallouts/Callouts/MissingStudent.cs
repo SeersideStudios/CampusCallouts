@@ -162,13 +162,13 @@ namespace CampusCallouts.Callouts
         private void RunRoommateDialogue()
         {
             string[] lines = new string[] {
-                "Officer, thank you for coming...",
-                "My roommate hasn’t been home since last night.",
-                "They were exploring somewhere before class.",
-                Scenario == LeadType.Beach ? "They said they’d check out some structures near the beach." :
-                Scenario == LeadType.Observatory ? "They were taking photos near the observatory." :
-                "They had a group meeting at the pier.",
-                "Please find them... I’m really worried."
+                "~y~ROOMMATE: ~w~Officer, thank you for coming...",
+                "~y~ROOMMATE: ~w~My roommate hasn’t been home since last night.",
+                "~y~ROOMMATE: ~w~They were exploring somewhere before class.",
+                Scenario == LeadType.Beach ? "~y~STUDENT: ~w~They said they’d check out some structures near the beach." :
+                Scenario == LeadType.Observatory ? "~y~STUDENT: ~w~They were taking photos near the observatory." :
+                "~y~ROOMMATE: ~w~They had a group meeting at the pier.",
+                "~y~ROOMMATE: ~w~Please find them... I’m really worried."
             };
 
             if (DialogueStep < lines.Length) Game.DisplaySubtitle(lines[DialogueStep]);
@@ -254,11 +254,21 @@ namespace CampusCallouts.Callouts
 
         private void RunStudentDialogue()
         {
-            string[] lines = new string[] {
-        Attacker.Exists() ? "~y~STUDENT: ~w~You saved me... I didn’t know what to do." : "~y~STUDENT: ~w~Thank you for finding me...",
-        "~y~STUDENT: ~w~I was just trying to clear my head. I didn’t think it’d become all this.",
+            string[] dialogueWithAttacker = new string[]
+            {
+        "~y~STUDENT: ~w~You showed up just in time... I thought I was done for.",
+        "~y~STUDENT: ~w~I didn’t expect someone to follow me out here.",
+        "~y~STUDENT: ~w~Thanks for stepping in. Can you help me get back?"
+            };
+
+            string[] dialogueWithoutAttacker = new string[]
+            {
+        "~y~STUDENT: ~w~Hey... thank you for finding me.",
+        "~y~STUDENT: ~w~I just needed space to breathe. I didn’t mean to scare anyone.",
         "~y~STUDENT: ~w~Can you help me get home?"
-    };
+            };
+
+            string[] lines = Attacker.Exists() ? dialogueWithAttacker : dialogueWithoutAttacker;
 
             if (StudentDialogueIndex < lines.Length)
             {
@@ -270,11 +280,12 @@ namespace CampusCallouts.Callouts
             if (StudentDialogueIndex >= lines.Length)
             {
                 if (TargetBlip.Exists()) TargetBlip.Delete();
-                Game.DisplayNotification("~y~Use Stop The Ped to call a taxi for the student.");
+                Game.DisplayNotification("~y~Use Stop The Ped to call a taxi for the student. Or let her be on her way.");
                 Game.LogTrivial("CampusCallouts - Missing Student - Callout complete");
                 End();
             }
         }
+
 
 
         public override void End()
@@ -287,7 +298,7 @@ namespace CampusCallouts.Callouts
                 if (Student.Exists()) Student.Dismiss();
                 if (Attacker.Exists()) Attacker.Dismiss();
                 if (TargetBlip.Exists()) TargetBlip.Delete();
-
+                LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
                 Game.LogTrivial("CampusCallouts - Missing Student - Cleaned up");
             }
             catch (Exception ex)
