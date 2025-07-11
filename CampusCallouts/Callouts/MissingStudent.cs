@@ -1,6 +1,4 @@
-﻿// Enhanced MissingStudent.cs with added guidance dialogues
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using LSPD_First_Response.Mod.API;
@@ -20,26 +18,40 @@ namespace CampusCallouts.Callouts
         private Ped Attacker;
         private Blip TargetBlip;
 
-        // Locations 
+        // Location Vectors
         private Vector3 DormLocation = new Vector3(-1671.686f, 174.0843f, 61.75573f);
 
-        private Vector3 OfficerBeach = new Vector3(0, 0, 0);
-        private Vector3 OfficerObservatory = new Vector3(0, 0, 0);
-        private Vector3 OfficerPier = new Vector3(0, 0, 0);
+        private Vector3 OfficerBeach = new Vector3(-1312.335f, -1530.487f, 4.402397f);
+        private Vector3 OfficerObservatory = new Vector3(-386.8726f, 1229.199f, 325.6562f);
+        private Vector3 OfficerPier = new Vector3(-1633.238f, -1007.771f, 13.06722f);
 
-        private Vector3 StudentBeach = new Vector3(0, 0, 0);
-        private Vector3 StudentObservatory = new Vector3(0, 0, 0);
-        private Vector3 StudentPier = new Vector3(0, 0, 0);
+        private Vector3 StudentBeach = new Vector3(-1488.886f, -1500.91f, 4.386162f);
+        private Vector3 StudentObservatory = new Vector3(-363.62f, 1305.857f, 343.1893f);
+        private Vector3 StudentPier = new Vector3(-1597.904f, -1001.693f, 7.560878f);
 
-        private Vector3 AttackerBeach = new Vector3(0, 0, 0);
-        private Vector3 AttackerObservatory = new Vector3(0, 0, 0);
-        private Vector3 AttackerPier = new Vector3(0, 0, 0);
+        private Vector3 AttackerBeach = new Vector3(-1481.177f, -1489.76f, 1.989588f);
+        private Vector3 AttackerObservatory = new Vector3(-355.7941f, 1300.398f, 338.9937f);
+        private Vector3 AttackerPier = new Vector3(-1599.316f, -1006.026f, 7.450534f);
+
+        // Heading Values
+        private readonly float OfficerBeachHeading = 204.5416f;
+        private readonly float OfficerObservatoryHeading = 108.6074f;
+        private readonly float OfficerPierHeading = 3.151609f;
+
+        private readonly float StudentBeachHeading = 295.2511f;
+        private readonly float StudentObservatoryHeading = 238.8863f;
+        private readonly float StudentPierHeading = 178.0605f;
+
+        private readonly float AttackerBeachHeading = 315.6851f;
+        private readonly float AttackerObservatoryHeading = 226.0512f;
+        private readonly float AttackerPierHeading = 221.3745f;
 
         private enum LeadType { Beach, Observatory, Pier }
         private LeadType Scenario;
 
-        // Checkers 
         private int DialogueStep = 0;
+        private int OfficerDialogueIndex = 0;
+        private int StudentDialogueIndex = 0;
         private bool OnScene = false;
         private bool IsInDialogue = false;
         private bool AttackerSpawned = false;
@@ -55,13 +67,9 @@ namespace CampusCallouts.Callouts
             CalloutAdvisory = "A student has been reported missing by their roommate. Please investigate.";
 
             if (Settings.UseBluelineAudio)
-            {
                 LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_CIVILIAN_REQUIRING_ASSISTANCE IN_OR_ON_POSITION", CalloutPosition);
-            }
             else
-            {
                 LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_CRIME_CIVILIAN_NEEDING_ASSISTANCE_01 IN_OR_ON_POSITION", CalloutPosition);
-            }
 
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_03_02");
             Game.LogTrivial("CampusCallouts - Missing Student - Callout setup complete");
@@ -88,37 +96,47 @@ namespace CampusCallouts.Callouts
         {
             base.Process();
 
-            if (Game.LocalPlayer.Character.IsDead || Roommate.IsDead || Student.IsDead || Game.IsKeyDown(Settings.EndCallout)) End();
+            if (Game.LocalPlayer.Character.IsDead ||
+                (Roommate.Exists() && Roommate.IsDead) ||
+                (Student.Exists() && Student.IsDead) ||
+                Game.IsKeyDown(Settings.EndCallout))
+            {
+                End();
+            }
 
-            if (!OnScene && Game.LocalPlayer.Character.DistanceTo(Roommate.Position) < 10f)
+            if (!OnScene && Roommate.Exists() && Game.LocalPlayer.Character.DistanceTo(Roommate.Position) < 10f)
             {
                 OnScene = true;
-                TargetBlip.DisableRoute();
+                if (TargetBlip.Exists()) TargetBlip.DisableRoute();
                 Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
             }
 
-            if (OnScene && Game.LocalPlayer.Character.DistanceTo(Roommate.Position) < 3f && Game.IsKeyDown(Settings.DialogueKey))
+            if (OnScene && Roommate.Exists() &&
+                Game.LocalPlayer.Character.DistanceTo(Roommate.Position) < 3f && Game.IsKeyDown(Settings.DialogueKey))
             {
                 if (!IsInDialogue) { IsInDialogue = true; DialogueStep = 0; Roommate.Face(Game.LocalPlayer.Character); }
                 RunRoommateDialogue();
             }
 
-            if (Officer != null && DialogueStep >= 5 && Game.LocalPlayer.Character.DistanceTo(Officer.Position) < 10f)
+            if (Officer.Exists() && DialogueStep >= 6 && DialogueStep < 10)
             {
-                TargetBlip.DisableRoute();
-                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to talk to the officer.");
-
-                if (Game.IsKeyDown(Settings.DialogueKey))
+                if (Game.LocalPlayer.Character.DistanceTo(Officer.Position) < 10f)
                 {
-                    Officer.Face(Game.LocalPlayer.Character);
-                    RunOfficerDialogue();
+                    Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to talk to the officer.");
+
+                    if (Game.IsKeyDown(Settings.DialogueKey))
+                    {
+                        Officer.Face(Game.LocalPlayer.Character);
+                        RunOfficerDialogue();
+                    }
                 }
             }
 
-            if (!AttackerSpawned && Student != null && Game.LocalPlayer.Character.DistanceTo(Student.Position) < 20f)
+            if (!AttackerSpawned && Student.Exists() &&
+                Game.LocalPlayer.Character.DistanceTo(Student.Position) < 20f)
             {
                 AttackerSpawned = true;
-                if (Attacker != null)
+                if (Attacker.Exists())
                 {
                     Game.DisplaySubtitle("~r~Stranger: Get lost, this isn’t your business!");
                     GameFiber.Sleep(2000);
@@ -126,13 +144,15 @@ namespace CampusCallouts.Callouts
                 }
             }
 
-            if (!CombatResolved && AttackerSpawned && (Attacker == null || !Attacker.Exists() || Attacker.IsDead || LSPD_First_Response.Mod.API.Functions.IsPedArrested(Attacker)))
+            if (!CombatResolved && AttackerSpawned &&
+                (!Attacker.Exists() || Attacker.IsDead || LSPD_First_Response.Mod.API.Functions.IsPedArrested(Attacker)))
             {
                 CombatResolved = true;
                 Game.DisplayNotification("Speak to the student to see if they’re alright.");
             }
 
-            if (CombatResolved && Game.LocalPlayer.Character.DistanceTo(Student.Position) < 5f && Game.IsKeyDown(Settings.DialogueKey))
+            if (CombatResolved && Student.Exists() &&
+                Game.LocalPlayer.Character.DistanceTo(Student.Position) < 5f && Game.IsKeyDown(Settings.DialogueKey))
             {
                 Student.Face(Game.LocalPlayer.Character);
                 RunStudentDialogue();
@@ -156,17 +176,24 @@ namespace CampusCallouts.Callouts
 
             if (DialogueStep == 5)
             {
-                Roommate.Dismiss();
+                if (Roommate.Exists()) Roommate.Dismiss();
 
-                Vector3 pos = Scenario == LeadType.Beach ? OfficerBeach : Scenario == LeadType.Observatory ? OfficerObservatory : OfficerPier;
-                Officer = new Ped("s_m_y_cop_01", pos, 0f);
+                Vector3 pos = Scenario == LeadType.Beach ? OfficerBeach :
+                              Scenario == LeadType.Observatory ? OfficerObservatory : OfficerPier;
+                float heading = Scenario == LeadType.Beach ? OfficerBeachHeading :
+                                Scenario == LeadType.Observatory ? OfficerObservatoryHeading : OfficerPierHeading;
+
+                Officer = new Ped("s_m_y_cop_01", pos, heading);
                 Officer.BlockPermanentEvents = true;
                 Officer.IsPersistent = true;
+
                 TargetBlip = Officer.AttachBlip();
                 TargetBlip.Color = Color.Blue;
                 TargetBlip.EnableRoute(Color.Blue);
-                Game.DisplayNotification("A nearby officer reported seeing someone who may match the description. Go speak to them.");
 
+                DialogueStep = 6;
+
+                Game.DisplayNotification("A nearby officer reported seeing someone who may match the description. Go speak to them.");
                 Game.LogTrivial("CampusCallouts - Missing Student - Officer spawned");
             }
         }
@@ -174,34 +201,46 @@ namespace CampusCallouts.Callouts
         private void RunOfficerDialogue()
         {
             string[] lines = new string[] {
-                "You’re here for the missing student, right?",
-                "Someone matching the description was nearby earlier.",
-                "They looked shaken and wandered off that way.",
-                "There’s a small path behind the building they might’ve taken. Go check it out and let me know what you find."
-            };
+        "~b~OFFICER: ~w~You’re here for the missing student, right?",
+        "~b~OFFICER: ~w~Someone matching the description was nearby earlier.",
+        "~b~OFFICER: ~w~They looked shaken and wandered off that way.",
+        "~b~OFFICER: ~w~There’s a small path behind the building they might’ve taken. Go check it out and let me know what you find."
+    };
 
-            if (DialogueStep - 5 < lines.Length) Game.DisplaySubtitle(lines[DialogueStep - 5]);
-            DialogueStep++;
-
-            if (DialogueStep == 9)
+            if (OfficerDialogueIndex < lines.Length)
             {
-                Officer.Dismiss();
-                TargetBlip.Delete();
+                Game.DisplaySubtitle(lines[OfficerDialogueIndex]);
+                OfficerDialogueIndex++;
+                DialogueStep++;
+            }
 
-                Vector3 studentPos = Scenario == LeadType.Beach ? StudentBeach : Scenario == LeadType.Observatory ? StudentObservatory : StudentPier;
-                Vector3 attackerPos = Scenario == LeadType.Beach ? AttackerBeach : Scenario == LeadType.Observatory ? AttackerObservatory : AttackerPier;
+            if (OfficerDialogueIndex >= lines.Length)
+            {
+                if (Officer.Exists()) Officer.Dismiss();
+                if (TargetBlip.Exists()) TargetBlip.Delete();
 
-                Student = new Ped("A_F_Y_StudioParty_02", studentPos, 0f);
+                Vector3 studentPos = Scenario == LeadType.Beach ? StudentBeach :
+                                     Scenario == LeadType.Observatory ? StudentObservatory : StudentPier;
+                float studentHeading = Scenario == LeadType.Beach ? StudentBeachHeading :
+                                       Scenario == LeadType.Observatory ? StudentObservatoryHeading : StudentPierHeading;
+
+                Vector3 attackerPos = Scenario == LeadType.Beach ? AttackerBeach :
+                                      Scenario == LeadType.Observatory ? AttackerObservatory : AttackerPier;
+                float attackerHeading = Scenario == LeadType.Beach ? AttackerBeachHeading :
+                                         Scenario == LeadType.Observatory ? AttackerObservatoryHeading : AttackerPierHeading;
+
+                Student = new Ped("A_F_Y_StudioParty_02", studentPos, studentHeading);
                 Student.BlockPermanentEvents = true;
                 Student.IsPersistent = true;
                 Student.Tasks.PlayAnimation("anim@heists@fleeca_bank@hostages@ped_d@cower", "cower", 1f, AnimationFlags.Loop);
+
                 TargetBlip = Student.AttachBlip();
                 TargetBlip.Color = Color.White;
                 TargetBlip.EnableRoute(Color.White);
 
                 if (new Random().NextDouble() < 0.5)
                 {
-                    Attacker = new Ped("g_m_y_lost_01", attackerPos, 0f);
+                    Attacker = new Ped("g_m_y_lost_01", attackerPos, attackerHeading);
                     Attacker.BlockPermanentEvents = true;
                     Attacker.IsPersistent = true;
                     Game.LogTrivial("CampusCallouts - Missing Student - Attacker spawned");
@@ -212,35 +251,51 @@ namespace CampusCallouts.Callouts
             }
         }
 
+
         private void RunStudentDialogue()
         {
             string[] lines = new string[] {
-                Attacker != null ? "You saved me... I didn’t know what to do." : "Thank you for finding me...",
-                "I was just trying to clear my head. I didn’t think it’d become all this.",
-                "Can you help me get home?"
-            };
+        Attacker.Exists() ? "~y~STUDENT: ~w~You saved me... I didn’t know what to do." : "~y~STUDENT: ~w~Thank you for finding me...",
+        "~y~STUDENT: ~w~I was just trying to clear my head. I didn’t think it’d become all this.",
+        "~y~STUDENT: ~w~Can you help me get home?"
+    };
 
-            if (DialogueStep - 9 < lines.Length) Game.DisplaySubtitle(lines[DialogueStep - 9]);
-            DialogueStep++;
-
-            if (DialogueStep == 12)
+            if (StudentDialogueIndex < lines.Length)
             {
-                TargetBlip.Delete();
+                Game.DisplaySubtitle(lines[StudentDialogueIndex]);
+                StudentDialogueIndex++;
+                DialogueStep++;
+            }
+
+            if (StudentDialogueIndex >= lines.Length)
+            {
+                if (TargetBlip.Exists()) TargetBlip.Delete();
                 Game.DisplayNotification("~y~Use Stop The Ped to call a taxi for the student.");
                 Game.LogTrivial("CampusCallouts - Missing Student - Callout complete");
                 End();
             }
         }
 
+
         public override void End()
         {
-            Roommate?.Dismiss();
-            Officer?.Dismiss();
-            Student?.Dismiss();
-            Attacker?.Dismiss();
-            TargetBlip?.Delete();
-            Game.LogTrivial("CampusCallouts - Missing Student - Cleaned up");
             base.End();
+            try
+            {
+                if (Roommate.Exists()) Roommate.Dismiss();
+                if (Officer.Exists()) Officer.Dismiss();
+                if (Student.Exists()) Student.Dismiss();
+                if (Attacker.Exists()) Attacker.Dismiss();
+                if (TargetBlip.Exists()) TargetBlip.Delete();
+
+                Game.LogTrivial("CampusCallouts - Missing Student - Cleaned up");
+            }
+            catch (Exception ex)
+            {
+                Game.LogTrivial("CampusCallouts - Missing Student - Error during End(): " + ex.ToString());
+            }
+
+            
         }
     }
 }
