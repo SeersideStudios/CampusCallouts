@@ -148,7 +148,7 @@ namespace CampusCallouts.Callouts
                 (!Attacker.Exists() || Attacker.IsDead || LSPD_First_Response.Mod.API.Functions.IsPedArrested(Attacker)))
             {
                 CombatResolved = true;
-                Game.DisplayNotification("Speak to the student to see if they’re alright.");
+                Game.DisplayNotification("Speak to the student using ~y~" + Settings.DialogueKey +"~w~ to see if they’re alright.");
             }
 
             if (CombatResolved && Student.Exists() &&
