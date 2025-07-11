@@ -180,18 +180,31 @@ namespace CampusCallouts.Callouts
 
                 // Play custom protest music
                 Game.LogTrivial("CampusCallouts - Checking protest audio at: " + protestMusicPath);
+
                 if (System.IO.File.Exists(protestMusicPath))
                 {
-                    protestPlayer = new WindowsMediaPlayer();
-                    protestPlayer.URL = protestMusicPath;
-                    protestPlayer.settings.setMode("loop", true); // Loop until stopped
-                    protestPlayer.controls.play();
-                    Game.LogTrivial("CampusCallouts - Protest music started.");
+                    try
+                    {
+                        protestPlayer = new WindowsMediaPlayer();
+                        protestPlayer.URL = protestMusicPath;
+                        protestPlayer.settings.setMode("loop", true); // Loop the song
+                        protestPlayer.controls.play();
+                        Game.LogTrivial("CampusCallouts - Protest music started.");
+                    }
+                    catch (System.Runtime.InteropServices.COMException comEx)
+                    {
+                        Game.LogTrivial($"CampusCallouts - Protest music could not be played. COM Exception: {comEx.Message}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Game.LogTrivial($"CampusCallouts - Unexpected error playing protest music: {ex.Message}");
+                    }
                 }
                 else
                 {
                     Game.LogTrivial("CampusCallouts - Protest music file not found.");
                 }
+
             }
 
 
