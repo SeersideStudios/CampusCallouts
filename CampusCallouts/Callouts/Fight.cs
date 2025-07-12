@@ -53,7 +53,7 @@ namespace CampusCallouts.Callouts
         {
             //Create Peds
             Ped = new Ped(PedSpawn, PedHeading);
-            Ped2 = new Ped(PedSpawn, PedHeading);
+            Ped2 = new Ped(PedSpawn + new Vector3(1f, 0f, 0f), PedHeading);
             Ped.MakePersistent();
             Ped2.MakePersistent();
             Ped.BlockPermanentEvents = true;
@@ -91,7 +91,7 @@ namespace CampusCallouts.Callouts
             //First Line
             base.Process();
 
-            if (!OnScene & Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 15f)
+            if (!OnScene && Ped && Ped.Exists() && Ped2 && Ped2.Exists() && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 15f)
             {
                 OnScene = true;
                 Ped.Tasks.FightAgainst(Ped2, -1);
@@ -103,20 +103,22 @@ namespace CampusCallouts.Callouts
 
             if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Ped.IsDead)
             {
-                GameFiber.Sleep(3000);
-                this.End();
+                    this.End();
+
             }
 
             if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped2) || Ped2.IsDead)
             {
-                GameFiber.Sleep(3000);
-                this.End();
+
+                    this.End();
+
+
             }
 
             if (Game.IsKeyDown(Settings.EndCallout))
             {
-                GameFiber.Sleep(3000);
-                this.End();
+                    this.End();
+
             }
         }
 

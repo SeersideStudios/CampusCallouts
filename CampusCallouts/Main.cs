@@ -1,9 +1,10 @@
 ﻿using LSPD_First_Response.Mod.API;
 using Rage;
 using System;
-using System.Net;
-using System.Threading;
 using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Threading;
 
 [assembly: Rage.Attributes.Plugin("CampusCallouts", Description = "University Callouts ReMake for LSPDFR 0.4.9", Author = "Seerside Studios")] //Is this really needed?
 namespace CampusCallouts
@@ -12,7 +13,6 @@ namespace CampusCallouts
     {
         public static Version LatestVersion = new Version();
         public static Version UserVersion = new Version("1.0.1");
-
         public static bool UpToDate;
         public static bool CalloutInterface;
         public static bool Beta = false;

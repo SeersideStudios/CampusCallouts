@@ -2,167 +2,213 @@
 using LSPD_First_Response.Mod.API;
 using LSPD_First_Response.Mod.Callouts;
 using Rage;
+using System;
 using System.Drawing;
-using System.Xml.Linq;
+using WMPLib;
 
 namespace CampusCallouts.Callouts
 {
-    [CalloutInterface("[CC] Noise Complaint", CalloutProbability.Medium, "Neighbors report loud party activity near the dorm driveways.", "Code 1", "ULSAPD")]
+    [CalloutInterface("[CC] Noise Complaint", CalloutProbability.Medium, "Neighbors report loud party activity near the dorm backyards.", "Code 2", "ULSAPD")]
     public class NoiseComplaint : Callout
     {
-        //Private References
-        private Vector3 DrivewayLocation;
+        private Vector3 CalloutLocation = new Vector3(-1750.335f, 365.4604f, 89.23333f);
 
-        private Vector3 PedSpawn;
-        private Vector3 PedSpawn2;
-        private Vector3 PedSpawn3;
-        private Vector3 PedSpawn4;
-        private Vector3 PedSpawn5;
-        private float PedHeading;
-        private float PedHeading2;
-        private float PedHeading3;
-        private float PedHeading4;
-        private float PedHeading5;
+        private Ped[] Partygoers;
+        private Vector3[] PedSpawns = new Vector3[]
+        {
+            new Vector3(-1721.035f, 366.1222f, 89.77831f),
+            new Vector3(-1718.091f, 369.0178f, 89.77727f),
+            new Vector3(-1715.616f, 369.4782f, 89.77764f),
+            new Vector3(-1718.054f, 367.1187f, 89.7297f),
+            new Vector3(-1724.905f, 368.9243f, 89.78442f)
+        };
 
-        private Ped Ped1;
-        private Ped Ped2;
-        private Ped Ped3;
-        private Ped Ped4;
-        private Ped Ped5;
+        private float[] PedHeadings = new float[] { 275.85f, 227.28f, 121.82f, 74.67f, 254.49f };
 
-        private Blip DrivewayBlip;
-
+        private Blip AreaBlip;
         private bool OnScene = false;
+        private int DialogueStep = 0;
+        private bool InDialogue = false;
+        private int DialogueVariant = -1;
+        private Ped Speaker;
+        private Random rand = new Random();
+
+        private WindowsMediaPlayer musicPlayer;
+        private string musicPath = System.IO.Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            @"LSPDFR\\Audio\\Scanner\\CampusCallouts - Audio\\NoiseComplaint\\CC_PARTY_AUDIO.mp3"
+        );
 
         public override bool OnBeforeCalloutDisplayed()
         {
-            DrivewayLocation = new Vector3(-1750.335f, 365.4604f, 89.23333f);
-
-            PedSpawn = new Vector3(-1721.035f, 366.1222f, 89.77831f);
-            PedHeading = 275.8509f;
-
-            PedSpawn2 = new Vector3(-1718.091f, 369.0178f, 89.77727f);
-            PedHeading2 = 227.2813f;
-
-            PedSpawn3 = new Vector3(-1715.616f, 369.4782f, 89.77764f);
-            PedHeading3 = 121.8256f;
-
-            PedSpawn4 = new Vector3(-1718.054f, 367.1187f, 89.7297f);
-            PedHeading4 = 74.67124f;
-
-            PedSpawn5 = new Vector3(-1724.905f, 368.9243f, 89.78442f);
-            PedHeading5 = 254.4968f;
-
-            //Set callout position
-            this.CalloutPosition = PedSpawn;
-
-            //LSPDFR
+            CalloutPosition = CalloutLocation;
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
 
+            CalloutMessage = "Noise Complaint";
+            CalloutAdvisory = "Neighbors report loud party activity near one of the student dorm backyards.";
 
             if (Settings.UseBluelineAudio)
-            {
                 LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("POSSIBLE_DISTURBANCE", CalloutPosition);
-            }
             else
-            {
                 LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_POSSIBLE_DISTURBANCE IN_OR_ON_POSITION", CalloutPosition);
-            }
 
-            //Create Callout message
-            CalloutMessage = "Noise Complaint";
-
-            //Last Line
+            LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_02_02");
+            Game.LogTrivial("CampusCallouts - NoiseComplaint - Callout setup complete");
             return base.OnBeforeCalloutDisplayed();
         }
 
         public override bool OnCalloutAccepted()
         {
-            //Create Peds
-            Ped1 = new Ped(PedSpawn, PedHeading);
-            Ped1.MakePersistent();
-            Ped1.BlockPermanentEvents = true;
-            Ped1.Tasks.StandStill(-1);
-            Ped1.Tasks.PlayAnimation("amb@world_human_partying@male@partying_beer@base", "base", 1f, AnimationFlags.Loop);
+            Partygoers = new Ped[5];
+            for (int i = 0; i < 5; i++)
+            {
+                Partygoers[i] = new Ped(PedSpawns[i], PedHeadings[i]);
+                Partygoers[i].MakePersistent();
+                Partygoers[i].BlockPermanentEvents = true;
+                Partygoers[i].Tasks.StandStill(-1);
+                Partygoers[i].Tasks.PlayAnimation("amb@world_human_partying@male@partying_beer@base", "base", 1f, AnimationFlags.Loop);
+                Game.LogTrivial($"CampusCallouts - NoiseComplaint - Ped {i + 1} spawned at {PedSpawns[i]}");
+            }
 
-            Ped2 = new Ped(PedSpawn2, PedHeading2);
-            Ped2.MakePersistent();
-            Ped2.BlockPermanentEvents = true;
-            Ped2.Tasks.StandStill(-1);
-            Ped2.Tasks.PlayAnimation("amb@world_human_partying@male@partying_beer@base", "base", 1f, AnimationFlags.Loop);
+            Speaker = Partygoers[2];
+            Game.LogTrivial("CampusCallouts - NoiseComplaint - Dialogue speaker selected");
 
-            Ped3 = new Ped(PedSpawn3, PedHeading3);
-            Ped3.MakePersistent();
-            Ped3.BlockPermanentEvents = true;
-            Ped3.Tasks.StandStill(-1);
-            Ped3.Tasks.PlayAnimation("amb@world_human_partying@male@partying_beer@base", "base", 1f, AnimationFlags.Loop);
-
-            Ped4 = new Ped(PedSpawn4, PedHeading4);
-            Ped4.MakePersistent();
-            Ped4.BlockPermanentEvents = true;
-            Ped4.Tasks.StandStill(-1);
-            Ped4.Tasks.PlayAnimation("amb@world_human_partying@male@partying_beer@base", "base", 1f, AnimationFlags.Loop);
-
-            Ped5 = new Ped(PedSpawn5, PedHeading5);
-            Ped5.MakePersistent();
-            Ped5.BlockPermanentEvents = true;
-            Ped5.Tasks.StandStill(-1);
-            Ped5.Tasks.PlayAnimation("amb@world_human_partying@male@partying_beer@base", "base", 1f, AnimationFlags.Loop);
-
-            Game.LogTrivial("Peds created");
-
-            //Create Blip
-            DrivewayBlip = new Blip(DrivewayLocation);
-            DrivewayBlip.Color = Color.Blue;
-
-            //Draw Route
-            DrivewayBlip.EnableRoute(Color.Blue);
-
-            //Draw Help
-            Game.DisplayHelp("Neighbors have reported a noise complaint. Make your way to the area and investigate.");
-
-            //Last Line
+            AreaBlip = new Blip(CalloutLocation)
+            {
+                Color = Color.Blue
+            };
+            AreaBlip.EnableRoute(Color.Blue);
+            Game.DisplayHelp("Make your way to the reported location and investigate the noise complaint.");
+            Game.LogTrivial("CampusCallouts - NoiseComplaint - Blip and route set");
             return base.OnCalloutAccepted();
-        }
-
-        public override void OnCalloutNotAccepted()
-        {
-            //First Line
-            base.OnCalloutNotAccepted();
-            if (Ped1.Exists()) { Ped1.Dismiss(); }
-            if (DrivewayBlip.Exists()) { DrivewayBlip.Delete(); }
         }
 
         public override void Process()
         {
-            //First Line
             base.Process();
 
-            if (!OnScene & Game.LocalPlayer.Character.Position.DistanceTo(DrivewayLocation) <= 10f)
+            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(CalloutLocation) <= 10f)
             {
                 OnScene = true;
-                DrivewayBlip.DisableRoute();
-                CalloutInterfaceAPI.Functions.SendMessage(this, "You have arrived at the reported location.\nInvestigate the group and speak to individuals.");
-                Game.DisplayHelp("Investigate the area, (StopThePed reccomended). Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
-                Game.DisplayNotification("~y~[INFO]~w~ Be sure to check ID's of anyone drinking.");
+                AreaBlip.DisableRoute();
+                AreaBlip.Delete();
+                DialogueVariant = rand.Next(0, 3);
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to speak to someone. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplaySubtitle("~y~[INFO]~w~ Loud music and shouting can be heard from the back of the house.");
+
+                if (System.IO.File.Exists(musicPath))
+                {
+                    try
+                    {
+                        musicPlayer = new WindowsMediaPlayer();
+                        musicPlayer.URL = musicPath;
+                        musicPlayer.settings.setMode("loop", true);
+                        musicPlayer.settings.volume = 25;
+                        musicPlayer.controls.play();
+                        Game.LogTrivial("CampusCallouts - NoiseComplaint - Music started");
+                    }
+                    catch (Exception ex)
+                    {
+                        Game.LogTrivial("CampusCallouts - NoiseComplaint - Error playing music: " + ex.Message);
+                    }
+                }
+                else
+                {
+                    Game.LogTrivial("CampusCallouts - NoiseComplaint - Music file not found");
+                }
             }
-            
+
+            if (OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Speaker) <= 3f && Game.IsKeyDown(Settings.DialogueKey))
+            {
+                HandleDialogue();
+                GameFiber.StartNew(() => GameFiber.Sleep(250));
+            }
+
             if (Game.IsKeyDown(Settings.EndCallout))
             {
-                GameFiber.Sleep(3000);
-                this.End();
+                End();
+            }
+        }
+
+        private void HandleDialogue()
+        {
+            if (!InDialogue) { InDialogue = true; DialogueStep = 0; Speaker.Face(Game.LocalPlayer.Character); }
+
+            string[] variant0 = new string[]
+            {
+                "~b~You: ~w~Evening. We've had some complaints about the noise.",
+                "~y~Student: ~w~Oh! Sorry, officer. We'll turn it down.",
+                "~b~You: ~w~Thanks. Try to keep it quiet going forward.",
+                "~y~Student: ~w~Got it. Have a good one."
+            };
+
+            string[] variant1 = new string[]
+            {
+                "~b~You: ~w~Evening. Neighbors are complaining about your party.",
+                "~y~Student: ~w~What? It's barely even loud!",
+                "~b~You: ~w~Still, it's bothering people. Please turn it down.",
+                "~y~Student: ~w~Ugh... fine. Whatever."
+            };
+
+            string[] variant2 = new string[]
+            {
+                "~b~You: ~w~Hey there. This party's too loud, you need to shut it down.",
+                "~y~Student: ~w~Not happening. It’s the weekend, we’re celebrating.",
+                "~b~You: ~w~If it doesn’t stop, we might have to escalate this.",
+                "~y~Student: ~w~Do what you gotta do. We’re not done partying."
+            };
+
+            string[] selected = DialogueVariant == 0 ? variant0 : DialogueVariant == 1 ? variant1 : variant2;
+
+            if (DialogueStep < selected.Length)
+            {
+                Game.DisplaySubtitle(selected[DialogueStep]);
+                Game.LogTrivial($"CampusCallouts - NoiseComplaint - Dialogue step {DialogueStep} displayed (Variant {DialogueVariant})");
+                DialogueStep++;
+            }
+            else
+            {
+                InDialogue = false;
+                Game.LogTrivial("CampusCallouts - NoiseComplaint - Dialogue completed");
+
+                if (DialogueVariant != 2)
+                {
+                    Game.DisplayNotification("The partygoers agree to quiet down. You may end the call.");
+                    if (musicPlayer != null)
+                    {
+                        musicPlayer.controls.stop();
+                        musicPlayer.close();
+                        musicPlayer = null;
+                        Game.LogTrivial("CampusCallouts - NoiseComplaint - Music stopped due to cooperative outcome");
+                    }
+                }
+                else
+                {
+                    Game.DisplayNotification("The partygoers refuse to comply. Consider issuing a citation or calling backup.");
+                    Game.LogTrivial("CampusCallouts - NoiseComplaint - Music continues due to non-compliance");
+                }
             }
         }
 
         public override void End()
         {
-            //First Line
             base.End();
-            if (Ped1.Exists()) { Ped1.Dismiss(); }
-            if (DrivewayBlip.Exists()) { DrivewayBlip.Delete(); }
+            foreach (Ped p in Partygoers)
+                if (p.Exists()) p.Dismiss();
+
+            if (AreaBlip.Exists()) AreaBlip.Delete();
+
+            if (musicPlayer != null)
+            {
+                musicPlayer.controls.stop();
+                musicPlayer.close();
+                musicPlayer = null;
+                Game.LogTrivial("CampusCallouts - NoiseComplaint - Music stopped on callout end");
+            }
+
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
-            CalloutInterfaceAPI.Functions.SendMessage(this, "Noise complaint resolved. Units are Code 4.");
+            Game.LogTrivial("CampusCallouts - NoiseComplaint - Callout cleaned up");
         }
     }
 }

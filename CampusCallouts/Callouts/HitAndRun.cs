@@ -110,15 +110,23 @@ namespace CampusCallouts.Callouts
             SuspectCar = new Vehicle(chosenVehicle, SuspectCarSpawn, SuspectCarHeading);
             SuspectCar.IsPersistent = true;
             Game.LogTrivial("CampusCallouts - Hit and Run - Car created");
-            GameFiber.Wait(200);
+            GameFiber.StartNew(() => GameFiber.Sleep(200)); // non-blocking debounce
+
 
             //Create Ped for Car
-            Suspect = new Ped(SuspectCar.GetOffsetPositionFront(5f));
-            Suspect.IsPersistent = true;
-            Suspect.BlockPermanentEvents = true;
-            Suspect.WarpIntoVehicle(SuspectCar, -1);
+            if (SuspectCar && SuspectCar.Exists())
+            {
+                Suspect = new Ped(SuspectCar.GetOffsetPositionFront(5f));
+                if (Suspect && Suspect.Exists())
+                {
+                    Suspect.IsPersistent = true;
+                    Suspect.BlockPermanentEvents = true;
+                    Suspect.WarpIntoVehicle(SuspectCar, -1);
+                }
+            }
             Game.LogTrivial("CampusCallouts - Hit and Run - Suspect created");
-            GameFiber.Wait(200);
+            GameFiber.StartNew(() => GameFiber.Sleep(200)); // non-blocking debounce
+
 
             //Make the car start driving
             Suspect.Tasks.CruiseWithVehicle(SuspectCar, 15f, VehicleDrivingFlags.Normal);
@@ -170,7 +178,7 @@ namespace CampusCallouts.Callouts
             base.Process();
 
             // On Scene Events
-            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
+            if (!OnScene && Ped && Ped.Exists() && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
             {
                 OnScene = true;
                 PedBlip.DisableRoute();
@@ -235,7 +243,7 @@ namespace CampusCallouts.Callouts
                     }
 
                     DialogueStep++;
-                    GameFiber.Wait(200); // small debounce
+                    GameFiber.StartNew(() => GameFiber.Sleep(200)); // non-blocking debounce
                 }
             }
 
@@ -304,13 +312,14 @@ namespace CampusCallouts.Callouts
                     }
 
                     PulloverDialogueStep++;
-                    GameFiber.Wait(200);
+                    GameFiber.StartNew(() => GameFiber.Sleep(200)); // non-blocking debounce
                 }
             }
 
 
             //Check conditions to end callout
-            if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(Settings.EndCallout) || Ped.IsDead)
+            if ((Suspect && Suspect.Exists() && LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect)) || (Ped && Ped.Exists() && Ped.IsDead) || Game.IsKeyDown(Settings.EndCallout))
+
             {
                 End();
             }
@@ -329,6 +338,10 @@ namespace CampusCallouts.Callouts
         {
             base.End();
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
+            if (Pursuit != null && LSPD_First_Response.Mod.API.Functions.IsPursuitStillRunning(Pursuit))
+            {
+                LSPD_First_Response.Mod.API.Functions.ForceEndPursuit(Pursuit);
+            }
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (Suspect.Exists()) { Suspect.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }

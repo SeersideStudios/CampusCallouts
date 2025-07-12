@@ -21,6 +21,10 @@ namespace CampusCallouts.Callouts
 
         private bool CombatStarted = false;
         private bool OnScene = false;
+        private HashSet<Ped> ClownsInCombat = new HashSet<Ped>();
+
+
+        private RelationshipGroup ClownGroup;
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -51,6 +55,10 @@ namespace CampusCallouts.Callouts
         {
             int clownCount = rand.Next(4, 8);
 
+            ClownGroup = new RelationshipGroup("KILLERCLOWNS");
+            ClownGroup.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
+            ClownGroup.SetRelationshipWith(Game.LocalPlayer.Character.RelationshipGroup, Relationship.Hate);
+
             Ped player = Game.LocalPlayer.Character;
 
             for (int i = 0; i < clownCount; i++)
@@ -70,10 +78,7 @@ namespace CampusCallouts.Callouts
                 }
 
 
-                clown.RelationshipGroup = new RelationshipGroup("KILLERCLOWN_" + i);
-
-                clown.RelationshipGroup.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
-                clown.RelationshipGroup.SetRelationshipWith(player.RelationshipGroup, Relationship.Hate);
+                clown.RelationshipGroup = ClownGroup;
 
 
                 // Hate everyone nearby (except player and themselves)
@@ -84,9 +89,11 @@ namespace CampusCallouts.Callouts
                     {
                         if (allPeds[j].Exists() && allPeds[j] != player && allPeds[j] != clown)
                         {
-                            // Skip if ped is another clown
-                            if (allPeds[j].Model.Name == "S_M_Y_Clown_01") continue;
-                            clown.RelationshipGroup.SetRelationshipWith(allPeds[j].RelationshipGroup, Relationship.Hate);
+                            if (allPeds[j].Model.Name == "S_M_Y_Clown_01") continue; // skip other clowns
+                            if (allPeds[j].RelationshipGroup != ClownGroup)
+                            {
+                                clown.RelationshipGroup.SetRelationshipWith(allPeds[j].RelationshipGroup, Relationship.Hate);
+                            }
                         }
                     }
                     catch (IndexOutOfRangeException)
@@ -129,8 +136,8 @@ namespace CampusCallouts.Callouts
         {
             base.Process();
 
-            // Start clown attacks when player is close enough (e.g., 100f)
-            if (!CombatStarted && Game.LocalPlayer.Character.Position.DistanceTo(Clowns[0]) <= 100f)
+            // Start clown attacks when player is close enough
+            if (!CombatStarted && Clowns.Count > 0 && Clowns[0] != null && Clowns[0].Exists() && Game.LocalPlayer.Character.Position.DistanceTo(Clowns[0]) <= 100f)
             {
                 Game.LogTrivial("CampusCallouts - KillerClown - Player is within 100f. Clowns begin hostile behavior.");
                 CombatStarted = true;
@@ -141,11 +148,18 @@ namespace CampusCallouts.Callouts
             {
                 foreach (Ped clown in Clowns)
                 {
-                    if (clown.Exists() && !clown.IsDead && !clown.IsInCombat)
+                    if (clown.Exists() && !clown.IsDead && !ClownsInCombat.Contains(clown))
                     {
-                        AssignRelationshipsToNearbyPeds(clown); 
-
-                        clown.Tasks.FightAgainstClosestHatedTarget(30f);
+                        ClownsInCombat.Add(clown); // ensure only one fiber per clown
+                        GameFiber.StartNew(() =>
+                        {
+                            AssignRelationshipsToNearbyPeds(clown);
+                            GameFiber.Sleep(200); // short delay before they react
+                            if (clown.Exists() && !clown.IsDead)
+                            {
+                                clown.Tasks.FightAgainstClosestHatedTarget(30f);
+                            }
+                        });
                     }
                 }
             }
@@ -185,7 +199,10 @@ namespace CampusCallouts.Callouts
                 {
                     if (allPeds[j].Exists() && allPeds[j] != player && allPeds[j] != clown)
                     {
-                        clown.RelationshipGroup.SetRelationshipWith(allPeds[j].RelationshipGroup, Relationship.Hate);
+                        if (allPeds[j].RelationshipGroup != ClownGroup)
+                        {
+                            clown.RelationshipGroup.SetRelationshipWith(allPeds[j].RelationshipGroup, Relationship.Hate);
+                        }
                     }
                 }
                 catch (IndexOutOfRangeException)
@@ -213,6 +230,8 @@ namespace CampusCallouts.Callouts
 
             foreach (Blip b in ClownBlips)
                 if (b.Exists()) b.Delete();
+
+            ClownsInCombat.Clear();
         }
     }
 }

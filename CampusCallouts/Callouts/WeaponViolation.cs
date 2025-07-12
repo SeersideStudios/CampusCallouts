@@ -46,7 +46,7 @@ namespace CampusCallouts.Callouts
 
             //Create Callout message
             CalloutMessage = "Reports of an individual with a weapon";
-            
+
             //Last Line
             return base.OnBeforeCalloutDisplayed();
         }
@@ -155,4 +155,3 @@ namespace CampusCallouts.Callouts
         }
     }
 }
-

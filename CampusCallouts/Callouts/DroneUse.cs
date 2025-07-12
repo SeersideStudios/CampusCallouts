@@ -129,7 +129,7 @@ namespace CampusCallouts.Callouts
         {
             base.Process();
 
-            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
+            if (!OnScene && Ped && Ped.Exists() && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 10f)
             {
                 OnScene = true;
                 Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
@@ -149,7 +149,7 @@ namespace CampusCallouts.Callouts
             if (dialogueStarted && Game.IsKeyDown(Settings.DialogueKey))
             {
                 HandleDialogue();
-                GameFiber.Sleep(250); // Prevent multiple triggers from holding the key
+                GameFiber.StartNew(() => GameFiber.Sleep(250)); // Prevent multiple triggers from holding the key
             }
 
             if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped) || Game.IsKeyDown(Settings.EndCallout) || Ped.IsDead)

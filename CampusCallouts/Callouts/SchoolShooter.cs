@@ -20,7 +20,7 @@ namespace CampusCallouts.Callouts
 
         public override bool OnBeforeCalloutDisplayed()
         {
-            SpawnPoint = new Vector3(-1650f, 210f, 60.6f); 
+            SpawnPoint = new Vector3(-1650f, 210f, 60.6f);
 
             CalloutPosition = SpawnPoint;
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 40f);

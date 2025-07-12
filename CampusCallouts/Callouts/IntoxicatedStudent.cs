@@ -67,6 +67,11 @@ namespace CampusCallouts.Callouts
 
         public override bool OnCalloutAccepted()
         {
+            if (Main.CalloutInterface)
+            {
+                CalloutInterfaceAPI.Functions.SendMessage(this, "A possibly intoxicated student has been reported wandering the campus. Check their well-being.");
+            }
+
             // Spawn student
             Student = new Ped(StudentSpawn, StudentHeading);
             Student.MakePersistent();
@@ -104,7 +109,7 @@ namespace CampusCallouts.Callouts
         {
             base.Process();
 
-            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Student) <= 10f)
+            if (!OnScene && Student && Student.Exists() && Game.LocalPlayer.Character.Position.DistanceTo(Student) <= 10f)
             {
                 OnScene = true;
                 Game.DisplaySubtitle("~y~[INFO]~w~ Approach and speak to the student.");
@@ -114,8 +119,11 @@ namespace CampusCallouts.Callouts
             {
                 if (!IsInDialogue)
                 {
-                    Student.Tasks.Clear();
-                    Student.Face(Game.LocalPlayer.Character);
+                    if (Student && Student.Exists())
+                    {
+                        Student.Tasks.Clear();
+                        Student.Face(Game.LocalPlayer.Character);
+                    }
                     DialogueVariant = rand.Next(0, 2); // Randomize once
                     DialogueStep = 0;
                     IsInDialogue = true;
@@ -124,7 +132,7 @@ namespace CampusCallouts.Callouts
 
                 if (Game.IsKeyDown(Settings.DialogueKey))
                 {
-                    GameFiber.Wait(200); // Debounce
+                    GameFiber.StartNew(() => GameFiber.Sleep(200));  // Debounce
                     switch (DialogueVariant)
                     {
                         case 0:

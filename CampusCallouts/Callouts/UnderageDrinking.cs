@@ -57,13 +57,13 @@ namespace CampusCallouts.Callouts
             DateTime PedBirthday = new DateTime(2005, 6, 15);
 
             //Set ped first name
-            List<string> firstNames = new List<string>{"John", "Jane", "Michael", "Emily", "David", "Emma", "Daniel", "Olivia", "James", "Sophia"};
+            List<string> firstNames = new List<string> { "John", "Jane", "Michael", "Emily", "David", "Emma", "Daniel", "Olivia", "James", "Sophia" };
             Random firstNameRandom = new Random();
             int randomFirstName = firstNameRandom.Next(firstNames.Count);
             string FirstName = firstNames[randomFirstName];
 
             //Set ped last name
-            List<string> lastNames = new List<string>{"Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Martinez", "Hernandez"};
+            List<string> lastNames = new List<string> { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Martinez", "Hernandez" };
             Random lastNameRandom = new Random();
             int randomLastName = lastNameRandom.Next(lastNames.Count);
             string LastName = lastNames[randomLastName];

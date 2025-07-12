@@ -10,42 +10,42 @@ namespace CampusCallouts.Callouts
     [CalloutInterface("[CC] Vandalism", CalloutProbability.Medium, "911 Caller reports of someone vandalizing university property", "Code 2", "ULSAPD")]
     public class Vandalism : Callout
     {
+        // --- Entity References ---
         private Ped Suspect;
         private Blip SuspectBlip;
 
+        // --- Spawn Settings ---
         private Vector3 SuspectSpawn;
         private float SuspectHeading;
 
+        // --- Callout State Flags ---
         private bool OnScene = false;
         private bool GatheredInfo = false;
-
-        private Random rand = new Random();
-
-        private int DialogueStep = 0;
         private bool IsInDialogue = false;
-        private int dialogueVariant = -1;
+
+        // --- Dialogue Handling ---
+        private Random rand = new Random();
+        private int DialogueStep = 0;
+        private int dialogueVariant = -1; // 0 = compliant, 1 = hostile
 
         public override bool OnBeforeCalloutDisplayed()
         {
-            // Set spawn location
+            // Set spawn location and heading
             SuspectSpawn = new Vector3(-1611.607f, 182.3768f, 59.72588f);
             SuspectHeading = 223.0731f;
-
             CalloutPosition = SuspectSpawn;
 
+            // UI Setup
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
             AddMinimumDistanceCheck(20f, CalloutPosition);
             CalloutMessage = "Vandalism in Progress";
             CalloutAdvisory = "911 Caller reports of someone vandalizing university property.";
 
+            // Scanner Audio (BlueLine or custom)
             if (Settings.UseBluelineAudio)
-            {
                 LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CRIME_CRIMINAL_ACTIVITY_04", CalloutPosition);
-            }
             else
-            {
                 LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_CRIME_CRIMINAL_ACTIVITY_05 IN_OR_ON_POSITION", CalloutPosition);
-            }
 
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_02_02");
 
@@ -54,24 +54,25 @@ namespace CampusCallouts.Callouts
 
         public override bool OnCalloutAccepted()
         {
-            // Spawn suspect
+            // Spawn the suspect
             Suspect = new Ped(SuspectSpawn, SuspectHeading);
-            Suspect.MakePersistent();
-            Suspect.BlockPermanentEvents = true;
+            if (Suspect.Exists())
+            {
+                Suspect.MakePersistent();
+                Suspect.BlockPermanentEvents = true;
 
-            // Gives Suspect Bat 
-            Suspect.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
+                // Give suspect a weapon (bat)
+                Suspect.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
+                Suspect.Tasks.PlayAnimation("melee@large_wpn@streamed_core", "plyr_rear_takedown_bat_r_facehit", 1.0f, AnimationFlags.Loop);
 
-            // Suspect swings bat
-            Suspect.Tasks.PlayAnimation("melee@large_wpn@streamed_core", "plyr_rear_takedown_bat_r_facehit", 1.0f, AnimationFlags.Loop);
+                // Create blip with route
+                SuspectBlip = Suspect.AttachBlip();
+                SuspectBlip.Color = Color.Red;
+                SuspectBlip.EnableRoute(Color.Red);
 
-            // Create blip
-            SuspectBlip = Suspect.AttachBlip();
-            SuspectBlip.Color = Color.Red;
-            SuspectBlip.EnableRoute(Color.Red);
-
-            Game.DisplayHelp("A student appears to be smashing school property with a bat. Approach and investigate.");
-            Game.LogTrivial("CampusCallouts - Vandalism - Suspect spawned and swinging bat.");
+                Game.DisplayHelp("A student appears to be smashing school property with a bat. Approach and investigate.");
+                Game.LogTrivial("CampusCallouts - Vandalism - Suspect spawned and swinging bat.");
+            }
 
             return base.OnCalloutAccepted();
         }
@@ -87,6 +88,7 @@ namespace CampusCallouts.Callouts
         {
             base.Process();
 
+            // Player approaches the scene
             if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Suspect) <= 10f)
             {
                 OnScene = true;
@@ -94,6 +96,7 @@ namespace CampusCallouts.Callouts
                 Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the suspect to gather information.");
             }
 
+            // Initiate dialogue if close and not already handled
             if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Suspect) <= 3f)
             {
                 if (!IsInDialogue)
@@ -108,7 +111,7 @@ namespace CampusCallouts.Callouts
 
                 if (Game.IsKeyDown(Settings.DialogueKey))
                 {
-                    if (dialogueVariant == 1) // Hostile variation
+                    if (dialogueVariant == 1) // Hostile variant
                     {
                         switch (DialogueStep)
                         {
@@ -133,7 +136,7 @@ namespace CampusCallouts.Callouts
                                 break;
                         }
                     }
-                    else // Compliant variation
+                    else // Compliant variant
                     {
                         switch (DialogueStep)
                         {
@@ -153,7 +156,7 @@ namespace CampusCallouts.Callouts
                                 Game.DisplaySubtitle("~b~You: ~w~That doesn’t excuse this behavior. You’re lucky someone didn’t get hurt.");
                                 break;
                             case 5:
-                                Game.DisplayNotification("The suspect appears remorseful and is complying. Deal with him as you deem fit");
+                                Game.DisplayNotification("The suspect appears remorseful and is complying. Deal with him as you deem fit.");
                                 GatheredInfo = true;
                                 IsInDialogue = false;
                                 break;
@@ -161,16 +164,16 @@ namespace CampusCallouts.Callouts
                     }
 
                     DialogueStep++;
-                    GameFiber.Wait(200); // debounce
+                    GameFiber.StartNew(() => GameFiber.Sleep(200)); // Non-blocking debounce
                 }
             }
 
+            // End conditions
             if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Suspect) || Game.IsKeyDown(Settings.EndCallout) || Suspect.IsDead)
             {
                 End();
             }
         }
-
 
         public override void End()
         {

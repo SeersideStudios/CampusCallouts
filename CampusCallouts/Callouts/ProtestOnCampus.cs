@@ -171,7 +171,7 @@ namespace CampusCallouts.Callouts
         {
             base.Process();
 
-            if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 30f)
+            if (!OnScene && Dean && Dean.Exists() && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 30f)
             {
                 OnScene = true;
                 Dean.Face(Game.LocalPlayer.Character);
@@ -188,6 +188,7 @@ namespace CampusCallouts.Callouts
                         protestPlayer = new WindowsMediaPlayer();
                         protestPlayer.URL = protestMusicPath;
                         protestPlayer.settings.setMode("loop", true); // Loop the song
+                        protestPlayer.settings.volume = 25; // Set volume to 25%
                         protestPlayer.controls.play();
                         Game.LogTrivial("CampusCallouts - Protest music started.");
                     }
@@ -211,7 +212,7 @@ namespace CampusCallouts.Callouts
             if (OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 4f && Game.IsKeyDown(Settings.DialogueKey) && !EscortStarted)
             {
                 RunDialogue();
-                GameFiber.Sleep(300); // debounce
+                GameFiber.StartNew(() => GameFiber.Sleep(300)); // debounce
             }
 
             if (EscortStarted && Dean.Exists() && Dean.Position.DistanceTo(DeanDestination) > 15f && Hostiles.Count == 0)
