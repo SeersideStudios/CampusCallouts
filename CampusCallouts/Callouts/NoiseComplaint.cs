@@ -4,7 +4,7 @@ using LSPD_First_Response.Mod.Callouts;
 using Rage;
 using System;
 using System.Drawing;
-using WMPLib;
+using NAudio.Wave;
 
 namespace CampusCallouts.Callouts
 {
@@ -33,10 +33,12 @@ namespace CampusCallouts.Callouts
         private Ped Speaker;
         private Random rand = new Random();
 
-        private WindowsMediaPlayer musicPlayer;
+        private WaveOutEvent outputDevice;
+        private AudioFileReader audioFile;
+
         private string musicPath = System.IO.Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
-            @"LSPDFR\\Audio\\Scanner\\CampusCallouts - Audio\\NoiseComplaint\\CC_PARTY_AUDIO.mp3"
+            @"LSPDFR\Audio\Scanner\CampusCallouts - Audio\NoiseComplaint\CC_PARTY_AUDIO.wav"
         );
 
         public override bool OnBeforeCalloutDisplayed()
@@ -93,6 +95,10 @@ namespace CampusCallouts.Callouts
                 OnScene = true;
                 AreaBlip.DisableRoute();
                 AreaBlip.Delete();
+                AreaBlip = new Blip(Speaker.Position)
+                {
+                    Color = Color.Red
+                };
                 DialogueVariant = rand.Next(0, 3);
                 Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to speak to someone. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
                 Game.DisplaySubtitle("~y~[INFO]~w~ Loud music and shouting can be heard from the back of the house.");
@@ -101,12 +107,29 @@ namespace CampusCallouts.Callouts
                 {
                     try
                     {
-                        musicPlayer = new WindowsMediaPlayer();
-                        musicPlayer.URL = musicPath;
-                        musicPlayer.settings.setMode("loop", true);
-                        musicPlayer.settings.volume = 25;
-                        musicPlayer.controls.play();
-                        Game.LogTrivial("CampusCallouts - NoiseComplaint - Music started");
+                        audioFile = new AudioFileReader(musicPath);
+                        outputDevice = new WaveOutEvent();
+                        outputDevice.Init(audioFile);
+                        outputDevice.Volume = 0.5f;
+                        outputDevice.Play();
+
+                        outputDevice.PlaybackStopped += (s, a) =>
+                        {
+                            if (audioFile != null && outputDevice != null)
+                            {
+                                try
+                                {
+                                    audioFile.Position = 0;
+                                    outputDevice.Play();
+                                }
+                                catch (InvalidOperationException ex)
+                                {
+                                    Game.LogTrivial("CampusCallouts - NoiseComplaint - PlaybackStopped error: " + ex.Message);
+                                }
+                            }
+                        };
+
+                        Game.LogTrivial("CampusCallouts - NoiseComplaint - Music started using NAudio.");
                     }
                     catch (Exception ex)
                     {
@@ -115,11 +138,11 @@ namespace CampusCallouts.Callouts
                 }
                 else
                 {
-                    Game.LogTrivial("CampusCallouts - NoiseComplaint - Music file not found");
+                    Game.LogTrivial("CampusCallouts - NoiseComplaint - Music file not found.");
                 }
             }
 
-            if (OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Speaker) <= 3f && Game.IsKeyDown(Settings.DialogueKey))
+            if (OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Speaker) <= 8f && Game.IsKeyDown(Settings.DialogueKey))
             {
                 HandleDialogue();
                 GameFiber.StartNew(() => GameFiber.Sleep(250));
@@ -130,6 +153,7 @@ namespace CampusCallouts.Callouts
                 End();
             }
         }
+
 
         private void HandleDialogue()
         {
@@ -175,13 +199,7 @@ namespace CampusCallouts.Callouts
                 if (DialogueVariant != 2)
                 {
                     Game.DisplayNotification("The partygoers agree to quiet down. You may end the call.");
-                    if (musicPlayer != null)
-                    {
-                        musicPlayer.controls.stop();
-                        musicPlayer.close();
-                        musicPlayer = null;
-                        Game.LogTrivial("CampusCallouts - NoiseComplaint - Music stopped due to cooperative outcome");
-                    }
+                    StopMusic();
                 }
                 else
                 {
@@ -199,16 +217,35 @@ namespace CampusCallouts.Callouts
 
             if (AreaBlip.Exists()) AreaBlip.Delete();
 
-            if (musicPlayer != null)
-            {
-                musicPlayer.controls.stop();
-                musicPlayer.close();
-                musicPlayer = null;
-                Game.LogTrivial("CampusCallouts - NoiseComplaint - Music stopped on callout end");
-            }
+            StopMusic();
 
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             Game.LogTrivial("CampusCallouts - NoiseComplaint - Callout cleaned up");
+        }
+
+        private void StopMusic()
+        {
+            try
+            {
+                if (outputDevice != null)
+                {
+                    outputDevice.Stop();
+                    outputDevice.Dispose();
+                    outputDevice = null;
+                }
+
+                if (audioFile != null)
+                {
+                    audioFile.Dispose();
+                    audioFile = null;
+                }
+
+                Game.LogTrivial("CampusCallouts - NoiseComplaint - Music stopped and disposed (NAudio)");
+            }
+            catch (Exception ex)
+            {
+                Game.LogTrivial("CampusCallouts - NoiseComplaint - Error in StopMusic(): " + ex.Message);
+            }
         }
     }
 }

@@ -87,7 +87,7 @@ namespace CampusCallouts.Callouts
             //First Line
             base.Process();
 
-            if (!OnScene & Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 15f)
+            if (!OnScene & Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 30f)
             {
                 OnScene = true;
                 PedBlip.DisableRoute();
@@ -115,7 +115,7 @@ namespace CampusCallouts.Callouts
         {
             //First Line
             base.End();
-            if (Ped.Exists()) { Ped.Dismiss(); }
+            if (Ped.Exists()) { Ped.Delete(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             Game.LogTrivial("CampusCallouts - WeaponViolation callout cleaned up.");

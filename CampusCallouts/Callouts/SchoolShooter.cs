@@ -118,7 +118,7 @@ namespace CampusCallouts.Callouts
         public override void End()
         {
             base.End();
-            if (Shooter.Exists()) Shooter.Dismiss();
+            if (Shooter.Exists()) Shooter.Delete();
             if (ShooterBlip.Exists()) ShooterBlip.Delete();
 
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
