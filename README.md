@@ -6,11 +6,10 @@
 
 ## 🔓 Open Source Notice
 
-Campus Callouts is an open-source mod built for learning, creativity, and collaboration.  
+Campus Callouts is an open-source mod. I've done this as I know all too well the lack of help out there (apart from a few special people). This is made for anyone to learn and use to help create their own callout pack! Good luck you aspiring devs 🥺  
 You are **free to view, learn from, and reuse parts of this code** in your own projects **with credit**.
 
-If you use parts of this plugin or adapt its callouts or logic, please credit **Seerside Studios** and link back to this repository or the Nexus page.  
-This project was built from passion and shared with the community to help others grow and explore C# modding.
+If you use parts of this plugin or adapt its callouts or logic, please credit **Seerside Studios**.  
 
 ---
 
