@@ -71,7 +71,7 @@ To update from a previous version of Campus Callouts:
 
 1. Backup your `CampusCallouts.ini` file if you've made custom changes.  
 2. **Delete the old `CampusCallouts - Audio` folder** inside `LSPDFR/Audio/Scanner/`  
-   - This is important — older audio files may no longer be used in the new version.  
+   - This is important as older audio files may no longer be used in the new version.  
 3. Drag and drop the new `lspdfr` and `plugins` folders (including `NAudio.dll`) into your GTA V directory.  
 4. Replace files when prompted.  
 5. Launch the game and enjoy the updated version.  
