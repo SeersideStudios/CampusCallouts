@@ -104,4 +104,58 @@ Campus Callouts includes 15 fully scripted, immersive scenarios:
 
 Once you’re on duty in LSPDFR, **Campus Callouts will load automatically**.
 
-Callouts can also be manually triggered using the console:
+Callouts can also be manually triggered using the console: F4, then StartCallout CalloutName
+
+
+---
+
+## CampusCallouts.ini Configuration
+
+Located at:  
+`plugins > LSPDFR > CampusCallouts.ini`
+
+Options include:
+- Change the **Dialogue Key**  
+- Enable/disable **specific callouts**  
+- Toggle use of **Blueline Dispatch Audio**  
+
+### UseBluelineDispatchAudio  
+Only set this to `True` if you use **Blueline Dispatch**.  
+If left `False`, it will use default scanner audio.
+
+---
+
+## About Seerside Studios
+
+Hi! I'm the solo developer behind Seerside Studios.  
+I started out creating immersive **Blade and Sorcery** mods in VR that received nearly **70,000 downloads**.  
+Now, I’m diving deep into **GTA V modding**, bringing the same attention to detail and creativity.
+
+This project is not only my **first LSPDFR release**, but also my first time using **C#**.  
+Before this, I had experience in JavaScript, HTML, and CSS.
+
+Check out more of my work:  
+https://next.nexusmods.com/profile/SeersideStudios?gameId=4124
+
+---
+
+## Support and Community
+
+Need help or want to contribute?
+
+- **Discord Server:** [Join for support and updates](https://discord.gg/7ngNaDJbfW)  
+- **GitHub Repository:** [View source or contribute](https://github.com/SeersideStudios/CampusCallouts)  
+
+---
+
+## Credits
+
+Huge thanks to everyone who made this project possible:
+
+- **AbelGaming** – Original creator of *University Callouts*, which served as a base for many scenarios.  
+  https://www.lcpdfr.com/downloads/gta5mods/scripts/37722-university-callouts/  
+- **Jon Jon Games** – For helping with scripting logic.  
+- **Opus** & **Charlie 686** – For troubleshooting CalloutInterfaceAPI and providing essential feedback.  
+- Everyone who offered feedback, testing help, or answered DMs – thank you.  
+- **Audio Credits** – See the included README inside the `Audio` folder for voice line and sound attribution.  
+
