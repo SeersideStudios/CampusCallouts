@@ -59,7 +59,7 @@ Each callout is crafted with research, time, and just the right amount of unpred
 ## Installation
 
 1. Unzip the mod archive.  
-2. Drag the `lspdfr` and `plugins` folders directly into your **GTA V main directory**.  
+2. Drag the `lspdfr` and `plugins` folders, and the .dll files directly into your **GTA V main directory**.  
 3. Allow file replacement if prompted.  
 4. Launch GTA V via **RagePluginHook** and go on duty to begin receiving callouts.  
 
