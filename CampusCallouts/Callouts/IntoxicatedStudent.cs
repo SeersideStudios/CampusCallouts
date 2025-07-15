@@ -2,6 +2,7 @@
 using LSPD_First_Response.Mod.API;
 using LSPD_First_Response.Mod.Callouts;
 using Rage;
+using Rage.Native;
 using System;
 using System.Drawing;
 
@@ -28,7 +29,7 @@ namespace CampusCallouts.Callouts
         private bool OnScene = false;
         private bool GatheredInfo = false;
 
-        private Random rand = new Random();
+        private static readonly Random rand = new Random();
 
         private int DialogueStep = 0;
         private bool IsInDialogue = false;
@@ -74,7 +75,7 @@ namespace CampusCallouts.Callouts
 
             // Spawn student
             Student = new Ped(StudentSpawn, StudentHeading);
-            Student.MakePersistent();
+            Student.IsPersistent = true; // Make the student persistent. More reliable than MakeMissionPed(); especially for callouts //
             Student.BlockPermanentEvents = true;
 
             // Make the student walk around aimlessly or appear drunk
@@ -122,12 +123,12 @@ namespace CampusCallouts.Callouts
                     if (Student && Student.Exists())
                     {
                         Student.Tasks.Clear();
-                        Student.Face(Game.LocalPlayer.Character);
+                        NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Student, Game.LocalPlayer.Character, -1); // Make the student look at the player. Better than Student.Face();
                     }
                     DialogueVariant = rand.Next(0, 2); // Randomize once
                     DialogueStep = 0;
                     IsInDialogue = true;
-                    Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                    Game.DisplayHelp("Press ~y~" + Settings.DialogueKey.ToString() + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout.ToString() + "~w~ to end the call.");
                 }
 
                 if (Game.IsKeyDown(Settings.DialogueKey))
@@ -157,23 +158,23 @@ namespace CampusCallouts.Callouts
                                     // Spawn hostile group (significant other + friends)
                                     Vector3 spawnPos = Student.GetOffsetPositionFront(7f);
                                     attacker = new Ped(AttackerSpawn, AttackerHeading);
-                                    attacker.MakePersistent();
+                                    attacker.IsPersistent = true; // Make the attacker persistent
                                     attacker.BlockPermanentEvents = true;
                                     attacker.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
                                     attacker.Tasks.FightAgainst(Student);
                                     attackerBlip = new Blip(attacker) { Color = Color.Red };
 
                                     attacker2 = new Ped(attacker.GetOffsetPositionFront(1.5f), attacker.Heading);
-                                    attacker2.MakePersistent();
+                                    attacker2.IsPersistent = true; // Make the attacker2 persistent
                                     attacker2.BlockPermanentEvents = true;
                                     attacker2.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
                                     attacker2.Tasks.FightAgainst(Student);
                                     attackerBlip2 = new Blip(attacker2) { Color = Color.Red };
 
                                     attacker3 = new Ped(attacker.GetOffsetPositionFront(-1.5f), attacker.Heading);
-                                    attacker3.MakePersistent();
+                                    attacker3.IsPersistent = true; // Make the attacker3 persistent
                                     attacker3.BlockPermanentEvents = true;
-                                    attacker3.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true);
+                                    attacker3.Inventory.GiveNewWeapon("WEAPON_BAT", -1, true); // You can create a wepList string to randomize the weapon instead of using the same ol weapon each time.
                                     attacker3.Tasks.FightAgainst(Student);
                                     attackerBlip3 = new Blip(attacker3) { Color = Color.Red };
 
