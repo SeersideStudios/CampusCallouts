@@ -44,17 +44,17 @@ namespace CampusCallouts.Callouts
         public override bool OnCalloutAccepted()
         {
             Car = new Vehicle("elegy2", CarSpawn, CarHeading);
-            if (Car.Exists()) Car.MakePersistent();
+            if (Car.Exists()) Car.IsPersistent = true; // Ensure the vehicle doesn't despawn. This is more reliable than using Car.MakePersistent(); //
 
             Ped = new Ped(PedSpawn, PedHeading);
             if (Ped.Exists())
             {
-                Ped.MakePersistent();
+                Ped.IsPersistent = true; // Ensure the ped doesn't despawn. This is more reliable than using Ped.MakePersistent(); //
                 Ped.BlockPermanentEvents = true;
                 Ped.Tasks.EnterVehicle(Car, -1);
                 PedBlip = Ped.AttachBlip();
                 PedBlip.Color = Color.Orange;
-                PedBlip.EnableRoute(Color.Orange);
+                PedBlip.IsRouteEnabled = true; // This is more reliable than using PedBlip.EnableRoute();
             }
 
             Game.DisplayHelp("Head to the student and prepare to escort them across campus.");
