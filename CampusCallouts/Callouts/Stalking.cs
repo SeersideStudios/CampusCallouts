@@ -3,6 +3,7 @@ using Rage;
 using LSPD_First_Response.Mod.Callouts;
 using LSPD_First_Response.Mod.API;
 using CalloutInterfaceAPI;
+using Rage.Native;
 
 namespace CampusCallouts.Callouts
 {
@@ -45,7 +46,7 @@ namespace CampusCallouts.Callouts
             Ped = new Ped(PedSpawn, PedHeading);
             if (Ped.Exists())
             {
-                Ped.MakePersistent();
+                Ped.IsPersistent = true;
                 Ped.BlockPermanentEvents = true;
                 Ped.Tasks.Wander();
             }
@@ -53,7 +54,7 @@ namespace CampusCallouts.Callouts
             Stalker = new Ped(PedSpawn + new Vector3(1.5f, 0, 0), PedHeading);
             if (Stalker.Exists())
             {
-                Stalker.MakePersistent();
+                Stalker.IsPersistent = true;
                 Stalker.BlockPermanentEvents = true;
                 Stalker.Tasks.FollowToOffsetFromEntity(Ped, new Vector3(1.5f, 1.5f, 1.5f));
             }
@@ -76,10 +77,10 @@ namespace CampusCallouts.Callouts
                 OnScene = true;
                 if (PedBlip.Exists()) PedBlip.DisableRoute();
                 Ped.Tasks.StandStill(-1);
-                Ped.Face(Game.LocalPlayer.Character);
+                NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Ped, Game.LocalPlayer.Character, -1);
                 Stalker.Tasks.ReactAndFlee(Game.LocalPlayer.Character);
 
-                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to speak to the student. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey.ToString() + "~w~ to speak to the student. Press ~y~" + Settings.EndCallout.ToString() + "~w~ to end the call.");
                 Game.DisplayNotification("~y~[INFO]~w~ Student appears shaken and has stopped walking.");
                 Game.LogTrivial("CampusCallouts - StalkingReport - OnScene reached. Dialogue initiated.");
             }
@@ -91,7 +92,7 @@ namespace CampusCallouts.Callouts
                     IsInDialogue = true;
                     DialogueStep = 0;
                     Ped.Tasks.Clear();
-                    Ped.Face(Game.LocalPlayer.Character);
+                    NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Ped, Game.LocalPlayer.Character, -1);
                 }
 
                 var gender = LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Stalker).Gender.ToString();
