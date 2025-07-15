@@ -15,7 +15,7 @@ namespace CampusCallouts.Callouts
         private Vector3 CalloutLocation = new Vector3(-1750.335f, 365.4604f, 89.23333f);
 
         private Ped[] Partygoers;
-        private Vector3[] PedSpawns = new Vector3[]
+        private readonly Vector3[] PedSpawns = new Vector3[]
         {
             new Vector3(-1721.035f, 366.1222f, 89.77831f),
             new Vector3(-1718.091f, 369.0178f, 89.77727f),
@@ -24,7 +24,7 @@ namespace CampusCallouts.Callouts
             new Vector3(-1724.905f, 368.9243f, 89.78442f)
         };
 
-        private float[] PedHeadings = new float[] { 275.85f, 227.28f, 121.82f, 74.67f, 254.49f };
+        private readonly float[] PedHeadings = new float[] { 275.85f, 227.28f, 121.82f, 74.67f, 254.49f };
 
         private Blip AreaBlip;
         private bool OnScene = false;
@@ -32,14 +32,14 @@ namespace CampusCallouts.Callouts
         private bool InDialogue = false;
         private int DialogueVariant = -1;
         private Ped Speaker;
-        private Random rand = new Random();
+        private readonly Random rand = new Random();
 
-        private List<Rage.Object> SpawnedProps = new List<Rage.Object>();
+        private readonly List<Rage.Object> SpawnedProps = new List<Rage.Object>();
 
         private WaveOutEvent outputDevice;
         private AudioFileReader audioFile;
 
-        private string musicPath = System.IO.Path.Combine(
+        private readonly string musicPath = System.IO.Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             @"LSPDFR\Audio\Scanner\CampusCallouts - Audio\NoiseComplaint\CC_PARTY_AUDIO.wav"
         );
@@ -69,7 +69,7 @@ namespace CampusCallouts.Callouts
             for (int i = 0; i < 5; i++)
             {
                 Partygoers[i] = new Ped(PedSpawns[i], PedHeadings[i]);
-                Partygoers[i].MakePersistent();
+                Partygoers[i].IsPersistent = true;
                 Partygoers[i].BlockPermanentEvents = true;
                 Partygoers[i].Tasks.StandStill(-1);
                 Partygoers[i].Tasks.PlayAnimation("amb@world_human_partying@male@partying_beer@base", "base", 1f, AnimationFlags.Loop);
@@ -254,7 +254,7 @@ namespace CampusCallouts.Callouts
 
                 );
 
-                beer.MakePersistent();
+                beer.IsPersistent = true;
             }
             catch (Exception ex)
             {
