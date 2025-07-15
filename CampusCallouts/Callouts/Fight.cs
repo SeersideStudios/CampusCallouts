@@ -43,8 +43,8 @@ namespace CampusCallouts.Callouts
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_03_02");
 
             //Create Callout message
-            CalloutMessage = "Students Fighting";
-            
+            CalloutMessage = "Students Fighting Reported"; // This will be displayed in the callout log. I prefer to have reported after to make it more realistic //
+
             //Last Line
             return base.OnBeforeCalloutDisplayed();
         }
