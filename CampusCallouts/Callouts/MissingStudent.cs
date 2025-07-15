@@ -5,6 +5,7 @@ using LSPD_First_Response.Mod.API;
 using LSPD_First_Response.Mod.Callouts;
 using Rage;
 using CalloutInterfaceAPI;
+using Rage.Native;
 
 namespace CampusCallouts.Callouts
 {
@@ -136,7 +137,7 @@ namespace CampusCallouts.Callouts
                 AttackerSpawned = true;
                 if (Attacker.Exists())
                 {
-                    Game.DisplaySubtitle("~r~Stranger: Get lost, this isn’t your business!");
+                    Game.DisplaySubtitle("~r~Stranger~w~: Get lost, this isn’t your business!"); // Color code. Reference to: https://www.lcpdfr.com/forums/topic/60739-calling-all-devs-standardisation-of-api-plugin-colors/ for callout color codes //
                     GameFiber.Sleep(2000);
                     Attacker.Tasks.FightAgainst(Game.LocalPlayer.Character);
                 }
@@ -152,7 +153,7 @@ namespace CampusCallouts.Callouts
             if (CombatResolved && Student.Exists() &&
                 Game.LocalPlayer.Character.DistanceTo(Student.Position) < 5f && Game.IsKeyDown(Settings.DialogueKey))
             {
-                Student.Face(Game.LocalPlayer.Character);
+                NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Student, Game.LocalPlayer.Character, -1);
                 RunStudentDialogue();
             }
         }
