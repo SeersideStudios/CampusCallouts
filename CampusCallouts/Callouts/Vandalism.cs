@@ -31,8 +31,8 @@ namespace CampusCallouts.Callouts
         public override bool OnBeforeCalloutDisplayed()
         {
             // Set spawn location and heading
-            SuspectSpawn = new Vector3(-1611.607f, 182.3768f, 59.72588f);
-            SuspectHeading = 223.0731f;
+            SuspectSpawn = new Vector3(-1608.392f, 181.1946f, 59.55967f);
+            SuspectHeading = 84.38181f;
             CalloutPosition = SuspectSpawn;
 
             // UI Setup

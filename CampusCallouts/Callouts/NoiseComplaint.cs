@@ -1,10 +1,11 @@
 ﻿using CalloutInterfaceAPI;
 using LSPD_First_Response.Mod.API;
 using LSPD_First_Response.Mod.Callouts;
+using NAudio.Wave;
 using Rage;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
-using NAudio.Wave;
 
 namespace CampusCallouts.Callouts
 {
@@ -32,6 +33,8 @@ namespace CampusCallouts.Callouts
         private int DialogueVariant = -1;
         private Ped Speaker;
         private Random rand = new Random();
+
+        private List<Rage.Object> SpawnedProps = new List<Rage.Object>();
 
         private WaveOutEvent outputDevice;
         private AudioFileReader audioFile;
@@ -70,6 +73,7 @@ namespace CampusCallouts.Callouts
                 Partygoers[i].BlockPermanentEvents = true;
                 Partygoers[i].Tasks.StandStill(-1);
                 Partygoers[i].Tasks.PlayAnimation("amb@world_human_partying@male@partying_beer@base", "base", 1f, AnimationFlags.Loop);
+                GiveBeerBottleToPed(Partygoers[i]);
                 Game.LogTrivial($"CampusCallouts - NoiseComplaint - Ped {i + 1} spawned at {PedSpawns[i]}");
             }
 
@@ -217,11 +221,48 @@ namespace CampusCallouts.Callouts
 
             if (AreaBlip.Exists()) AreaBlip.Delete();
 
+            foreach (var obj in SpawnedProps)
+                if (obj.Exists()) obj.Delete();
+            SpawnedProps.Clear();
+
             StopMusic();
 
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             Game.LogTrivial("CampusCallouts - NoiseComplaint - Callout cleaned up");
         }
+
+        private void GiveBeerBottleToPed(Ped ped)
+        {
+            if (!ped.Exists()) return;
+
+            try
+            {
+                // Random bottle type (optional)
+                string[] beerTypes = { "prop_beer_bottle", "prop_beer_am", "prop_beer_blr", "prop_beer_logger" };
+                string chosenBottle = beerTypes[new Random().Next(beerTypes.Length)];
+
+                // Spawn beer bottle
+                Rage.Object beer = new Rage.Object(chosenBottle, ped.GetOffsetPositionUp(0.5f));
+                SpawnedProps.Add(beer); // Add to spawned props for cleanup
+
+                // Attach to LEFT hand with proper offset for partying animation
+                beer.AttachTo(
+                    ped,
+                    ped.GetBoneIndex(PedBoneId.LeftHand),
+                    new Vector3(0.1230f, -0.1010f, 0.0600f),
+                    new Rotator(0f, 99.6838f, 90f)
+
+                );
+
+                beer.MakePersistent();
+            }
+            catch (Exception ex)
+            {
+                Game.LogTrivial("CampusCallouts: Failed to attach left-hand beer bottle: " + ex.Message);
+            }
+        }
+
+
 
         private void StopMusic()
         {

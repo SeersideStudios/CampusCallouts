@@ -11,14 +11,12 @@ namespace CampusCallouts.Callouts
     [CalloutInterface("[CC] Missing Student", CalloutProbability.Medium, "A student has been reported missing by their roommate.", "Code 3", "ULSAPD")]
     public class MissingStudent : Callout
     {
-        // Peds and Blips 
         private Ped Roommate;
         private Ped Officer;
         private Ped Student;
         private Ped Attacker;
         private Blip TargetBlip;
 
-        // Location Vectors
         private Vector3 DormLocation = new Vector3(-1671.686f, 174.0843f, 61.75573f);
 
         private Vector3 OfficerBeach = new Vector3(-1312.335f, -1530.487f, 4.402397f);
@@ -33,7 +31,6 @@ namespace CampusCallouts.Callouts
         private Vector3 AttackerObservatory = new Vector3(-355.7941f, 1300.398f, 338.9937f);
         private Vector3 AttackerPier = new Vector3(-1599.316f, -1006.026f, 7.450534f);
 
-        // Heading Values
         private readonly float OfficerBeachHeading = 204.5416f;
         private readonly float OfficerObservatoryHeading = 108.6074f;
         private readonly float OfficerPierHeading = 3.151609f;
@@ -56,6 +53,7 @@ namespace CampusCallouts.Callouts
         private bool IsInDialogue = false;
         private bool AttackerSpawned = false;
         private bool CombatResolved = false;
+        private bool CanAdvanceOfficerDialogue = true;
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -118,13 +116,13 @@ namespace CampusCallouts.Callouts
                 RunRoommateDialogue();
             }
 
-            if (Officer.Exists() && DialogueStep >= 6 && DialogueStep < 10)
+            if (Officer.Exists() && OfficerDialogueIndex < 4)
             {
                 if (Game.LocalPlayer.Character.DistanceTo(Officer.Position) < 10f)
                 {
                     Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to talk to the officer.");
 
-                    if (Game.IsKeyDown(Settings.DialogueKey))
+                    if (Game.IsKeyDown(Settings.DialogueKey) && CanAdvanceOfficerDialogue)
                     {
                         Officer.Face(Game.LocalPlayer.Character);
                         RunOfficerDialogue();
@@ -133,7 +131,7 @@ namespace CampusCallouts.Callouts
             }
 
             if (!AttackerSpawned && Student.Exists() &&
-                Game.LocalPlayer.Character.DistanceTo(Student.Position) < 20f)
+                Game.LocalPlayer.Character.DistanceTo(Student.Position) < 15f)
             {
                 AttackerSpawned = true;
                 if (Attacker.Exists())
@@ -165,8 +163,8 @@ namespace CampusCallouts.Callouts
                 "~y~ROOMMATE: ~w~Officer, thank you for coming...",
                 "~y~ROOMMATE: ~w~My roommate hasn’t been home since last night.",
                 "~y~ROOMMATE: ~w~They were exploring somewhere before class.",
-                Scenario == LeadType.Beach ? "~y~STUDENT: ~w~They said they’d check out some structures near the beach." :
-                Scenario == LeadType.Observatory ? "~y~STUDENT: ~w~They were taking photos near the observatory." :
+                Scenario == LeadType.Beach ? "~y~ROOMMATE: ~w~They said they’d check out some structures near the beach." :
+                Scenario == LeadType.Observatory ? "~y~ROOMMATE: ~w~They were taking photos near the observatory." :
                 "~y~ROOMMATE: ~w~They had a group meeting at the pier.",
                 "~y~ROOMMATE: ~w~Please find them... I’m really worried."
             };
@@ -191,8 +189,6 @@ namespace CampusCallouts.Callouts
                 TargetBlip.Color = Color.Blue;
                 TargetBlip.EnableRoute(Color.Blue);
 
-                DialogueStep = 6;
-
                 Game.DisplayNotification("A nearby officer reported seeing someone who may match the description. Go speak to them.");
                 Game.LogTrivial("CampusCallouts - Missing Student - Officer spawned");
             }
@@ -200,18 +196,26 @@ namespace CampusCallouts.Callouts
 
         private void RunOfficerDialogue()
         {
+            if (!CanAdvanceOfficerDialogue) return;
+
             string[] lines = new string[] {
-        "~b~OFFICER: ~w~You’re here for the missing student, right?",
-        "~b~OFFICER: ~w~Someone matching the description was nearby earlier.",
-        "~b~OFFICER: ~w~They looked shaken and wandered off that way.",
-        "~b~OFFICER: ~w~There’s a small path behind the building they might’ve taken. Go check it out and let me know what you find."
-    };
+                "~b~OFFICER: ~w~You’re here for the missing student, right?",
+                "~b~OFFICER: ~w~Someone matching the description was nearby earlier.",
+                "~b~OFFICER: ~w~They looked shaken, but I decided to leave it.",
+                "~b~OFFICER: ~w~There’s some noise over there. Go check it out and let me know what you find."
+            };
 
             if (OfficerDialogueIndex < lines.Length)
             {
                 Game.DisplaySubtitle(lines[OfficerDialogueIndex]);
                 OfficerDialogueIndex++;
-                DialogueStep++;
+
+                CanAdvanceOfficerDialogue = false;
+                GameFiber.StartNew(() =>
+                {
+                    GameFiber.Sleep(1000);
+                    CanAdvanceOfficerDialogue = true;
+                });
             }
 
             if (OfficerDialogueIndex >= lines.Length)
@@ -251,21 +255,18 @@ namespace CampusCallouts.Callouts
             }
         }
 
-
         private void RunStudentDialogue()
         {
-            string[] dialogueWithAttacker = new string[]
-            {
-        "~y~STUDENT: ~w~You showed up just in time... I thought I was done for.",
-        "~y~STUDENT: ~w~I didn’t expect someone to follow me out here.",
-        "~y~STUDENT: ~w~Thanks for stepping in. Can you help me get back?"
+            string[] dialogueWithAttacker = {
+                "~y~STUDENT: ~w~You showed up just in time... I thought I was done for.",
+                "~y~STUDENT: ~w~I didn’t expect someone to follow me out here.",
+                "~y~STUDENT: ~w~Thanks for stepping in. Can you help me get back?"
             };
 
-            string[] dialogueWithoutAttacker = new string[]
-            {
-        "~y~STUDENT: ~w~Hey... thank you for finding me.",
-        "~y~STUDENT: ~w~I just needed space to breathe. I didn’t mean to scare anyone.",
-        "~y~STUDENT: ~w~Can you help me get home?"
+            string[] dialogueWithoutAttacker = {
+                "~y~STUDENT: ~w~Hey... thank you for finding me.",
+                "~y~STUDENT: ~w~I just needed space to breathe. I didn’t mean to scare anyone.",
+                "~y~STUDENT: ~w~Can you help me get home?"
             };
 
             string[] lines = Attacker.Exists() ? dialogueWithAttacker : dialogueWithoutAttacker;
@@ -274,7 +275,6 @@ namespace CampusCallouts.Callouts
             {
                 Game.DisplaySubtitle(lines[StudentDialogueIndex]);
                 StudentDialogueIndex++;
-                DialogueStep++;
             }
 
             if (StudentDialogueIndex >= lines.Length)
@@ -285,8 +285,6 @@ namespace CampusCallouts.Callouts
                 End();
             }
         }
-
-
 
         public override void End()
         {
@@ -305,8 +303,6 @@ namespace CampusCallouts.Callouts
             {
                 Game.LogTrivial("CampusCallouts - Missing Student - Error during End(): " + ex.ToString());
             }
-
-
         }
     }
 }

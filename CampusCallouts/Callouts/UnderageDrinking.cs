@@ -19,6 +19,8 @@ namespace CampusCallouts.Callouts
         private Ped Ped;
         private bool OnScene = false;
 
+        private List<Rage.Object> SpawnedProps = new List<Rage.Object>();
+
         public override bool OnBeforeCalloutDisplayed()
         {
             PedSpawn = new Vector3(-1686.5f, 372.4233f, 85.11894f);
@@ -75,6 +77,7 @@ namespace CampusCallouts.Callouts
             Ped.BlockPermanentEvents = true;
             Ped.Tasks.StandStill(-1);
             Ped.Tasks.PlayAnimation("amb@world_human_partying@male@partying_beer@base", "base", 1f, AnimationFlags.Loop);
+            GiveBeerBottleToPed(Ped); // Give the beer bottle to the ped
             Game.LogTrivial("Ped created");
 
             //Create Blip
@@ -85,7 +88,7 @@ namespace CampusCallouts.Callouts
             PedBlip.EnableRoute(Color.Blue);
 
             //Draw Help
-            Game.DisplayHelp("Neighbors have reported underage drinking at a party. Make your way to the party and investigate.");
+            Game.DisplayHelp("Neighbors have reported underage drinking in the open. Make your way to the house and investigate.");
 
             //Last Line
             return base.OnCalloutAccepted();
@@ -109,7 +112,7 @@ namespace CampusCallouts.Callouts
                 OnScene = true;
                 PedBlip.DisableRoute();
                 Game.DisplayHelp("Use StopThePed for this callout. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
-                CalloutInterfaceAPI.Functions.SendMessage(this, "You have arrived at the party. Witness reportedly observed underage drinking.\nSpeak with the individual and take appropriate action.");
+                CalloutInterfaceAPI.Functions.SendMessage(this, "You have arrived at the party. Witness reportedly observed underage drinking.\nDeal with the situation how you feel fit.");
             }
 
             if (LSPD_First_Response.Mod.API.Functions.IsPedArrested(Ped))
@@ -125,12 +128,50 @@ namespace CampusCallouts.Callouts
             }
         }
 
+        private void GiveBeerBottleToPed(Ped ped)
+        {
+            if (!ped.Exists()) return;
+
+            try
+            {
+                // Random bottle type (optional)
+                string[] beerTypes = { "prop_beer_bottle", "prop_beer_am", "prop_beer_blr", "prop_beer_logger" };
+                string chosenBottle = beerTypes[new Random().Next(beerTypes.Length)];
+
+                // Spawn beer bottle
+                Rage.Object beer = new Rage.Object(chosenBottle, ped.GetOffsetPositionUp(0.5f));
+                SpawnedProps.Add(beer); // Add to spawned props for cleanup
+
+                // Attach to LEFT hand with proper offset for partying animation
+                beer.AttachTo(
+                    ped,
+                    ped.GetBoneIndex(PedBoneId.LeftHand),
+                    new Vector3(0.1230f, -0.1010f, 0.0600f),
+                    new Rotator(0f, 99.6838f, 90f)
+
+                );
+
+               
+
+                beer.MakePersistent();
+            }
+            catch (Exception ex)
+            {
+                Game.LogTrivial("CampusCallouts: Failed to attach left-hand beer bottle: " + ex.Message);
+            }
+        }
+
+
+
         public override void End()
         {
             //First Line
             base.End();
             if (Ped.Exists()) { Ped.Dismiss(); }
             if (PedBlip.Exists()) { PedBlip.Delete(); }
+            foreach (var obj in SpawnedProps)
+                if (obj.Exists()) obj.Delete();
+            SpawnedProps.Clear();
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             CalloutInterfaceAPI.Functions.SendMessage(this, "The underage drinking incident has been resolved. No further action required. Code 4.");
         }

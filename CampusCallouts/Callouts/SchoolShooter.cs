@@ -11,17 +11,13 @@ namespace CampusCallouts.Callouts
     public class SchoolShooter : Callout
     {
         private Ped Shooter;
-
         private Blip ShooterBlip;
-
         private Vector3 SpawnPoint;
-
         private bool CombatStarted = false;
 
         public override bool OnBeforeCalloutDisplayed()
         {
             SpawnPoint = new Vector3(-1650f, 210f, 60.6f);
-
             CalloutPosition = SpawnPoint;
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 40f);
             AddMinimumDistanceCheck(30f, CalloutPosition);
@@ -35,52 +31,45 @@ namespace CampusCallouts.Callouts
                 LSPD_First_Response.Mod.API.Functions.PlayScannerAudioUsingPosition("CC_WE_HAVE CC_A_WEAPONS_INCIDENT_SHOTS_FIRED IN_OR_ON_POSITION", CalloutPosition);
 
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_99_03");
-
             return base.OnBeforeCalloutDisplayed();
         }
 
         public override bool OnCalloutAccepted()
         {
-            // Spawn Shooter
+            // Spawn shooter
             Shooter = new Ped("S_M_Y_Marine_01", SpawnPoint, 180f);
+            Shooter.RelationshipGroup = new RelationshipGroup("SHOOTER"); // Set early
             Shooter.MakePersistent();
             Shooter.BlockPermanentEvents = true;
             Shooter.KeepTasks = true;
 
-            // Give Weapon
+            // Weapon
             Shooter.Inventory.GiveNewWeapon("WEAPON_CARBINERIFLE", 500, true);
 
-            // Make hostile
-            Shooter.RelationshipGroup = new RelationshipGroup("SHOOTER");
-            Shooter.RelationshipGroup.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
-            Shooter.RelationshipGroup.SetRelationshipWith(Game.LocalPlayer.Character.RelationshipGroup, Relationship.Hate);
+            // Set hostility
+            RelationshipGroup shooterGroup = Shooter.RelationshipGroup;
+            shooterGroup.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
+            shooterGroup.SetRelationshipWith(Game.LocalPlayer.Character.RelationshipGroup, Relationship.Hate);
 
-            // Hate nearby civilians
+            // Civilians react
             Ped[] allPeds = World.GetAllPeds();
-            for (int i = 0; i < 25; i++)
+            foreach (Ped civ in allPeds)
             {
-                try
+                if (!civ.Exists() || civ == Shooter || !civ.IsHuman || civ.IsPlayer || civ.RelationshipGroup == RelationshipGroup.Cop)
+                    continue;
+
+                // Set relationship and force panic
+                civ.RelationshipGroup.SetRelationshipWith(shooterGroup, Relationship.Hate);
+                shooterGroup.SetRelationshipWith(civ.RelationshipGroup, Relationship.Hate);
+
+                // Simulate fleeing from shooter by reacting to player (illusion)
+                if (civ.Position.DistanceTo(Shooter.Position) < 35f)
                 {
-                    Ped civ = allPeds[i];
-                    if (!civ.Exists() || civ == Shooter || civ == Game.LocalPlayer.Character || !civ.IsHuman || civ.IsPlayer || civ.RelationshipGroup == RelationshipGroup.Cop)
-                        continue;
-
-                    // Mutual hate
-                    Shooter.RelationshipGroup.SetRelationshipWith(civ.RelationshipGroup, Relationship.Hate);
-                    civ.RelationshipGroup.SetRelationshipWith(Shooter.RelationshipGroup, Relationship.Hate);
-
-                    // Panic & flee
-                    civ.Tasks.ReactAndFlee(Shooter);
+                    civ.Tasks.ReactAndFlee(Game.LocalPlayer.Character);
                 }
-                catch
-                {
-                    break;
-                }
-
-                GameFiber.Yield(); // helps prevent freezing on large ped scans
             }
 
-            // Blip
+            // Attach blip
             ShooterBlip = Shooter.AttachBlip();
             ShooterBlip.Color = Color.Red;
             ShooterBlip.EnableRoute(Color.Red);
@@ -100,12 +89,28 @@ namespace CampusCallouts.Callouts
         {
             base.Process();
 
-            if (!CombatStarted && Game.LocalPlayer.Character.Position.DistanceTo(Shooter) <= 100f)
+            if (!CombatStarted && Shooter.Exists() && Game.LocalPlayer.Character.Position.DistanceTo(Shooter) <= 100f)
             {
                 CombatStarted = true;
-                Shooter.Tasks.FightAgainstClosestHatedTarget(50f); // medium range, allows chasing but not across map
+
+                GameFiber.StartNew(() =>
+                {
+                    GameFiber.Sleep(300); // slight delay to simulate reaction time
+                    if (Shooter.Exists() && !Shooter.IsDead)
+                    {
+                        Shooter.Tasks.FightAgainstClosestHatedTarget(50f);
+                        GameFiber.Sleep(500);
+
+                        if (!Shooter.IsInCombat)
+                        {
+                            Shooter.Tasks.FightAgainst(Game.LocalPlayer.Character);
+                            Game.LogTrivial("CampusCallouts - SchoolShooter - Fallback: Shooter attacks player directly.");
+                        }
+                    }
+                });
+
                 Game.LogTrivial("CampusCallouts - SchoolShooter - Shooter has engaged.");
-                ShooterBlip.DisableRoute();
+                if (ShooterBlip.Exists()) ShooterBlip.DisableRoute();
                 Game.DisplayHelp("Press " + Settings.EndCallout + "~w~ to end the call.");
             }
 
@@ -118,9 +123,8 @@ namespace CampusCallouts.Callouts
         public override void End()
         {
             base.End();
-            if (Shooter.Exists()) Shooter.Delete();
+            if (Shooter.Exists()) Shooter.Dismiss();
             if (ShooterBlip.Exists()) ShooterBlip.Delete();
-
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("GP_CODE4_02");
             Game.LogTrivial("CampusCallouts - SchoolShooter - Callout cleaned up.");
         }
