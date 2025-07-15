@@ -148,7 +148,7 @@ namespace CampusCallouts.Callouts
             {
                 OnScene = true;
                 ClownBlips[0].DisableRoute();
-                Game.DisplayHelp("Press " + Settings.EndCallout + " to end the call.");
+                Game.DisplayHelp("Press " + Settings.EndCallout.ToString() + " to end the call.");
             }
         }
 
@@ -172,7 +172,7 @@ namespace CampusCallouts.Callouts
                 catch (Exception ex)
                 {
                     Game.LogTrivial("CampusCallouts - KillerClown - Ped scan failed: " + ex.Message);
-                    break;
+                    break; // you don't necessarily need to add a break here. It'll catch the error if it occurs during the callout.
                 }
 
                 GameFiber.Yield(); // smooth scan

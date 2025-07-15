@@ -45,7 +45,7 @@ namespace CampusCallouts.Callouts
             LSPD_First_Response.Mod.API.Functions.PlayScannerAudio("UNITS_RESPOND_CODE_99_03");
 
             //Create Callout message
-            CalloutMessage = "Reports of an individual with a weapon";
+            CalloutMessage = "Individual With A Weapon Reported"; 
 
             //Last Line
             return base.OnBeforeCalloutDisplayed();
@@ -55,7 +55,7 @@ namespace CampusCallouts.Callouts
         {
             //Create Peds
             Ped = new Ped(PedSpawn, PedHeading);
-            Ped.MakePersistent();
+            Ped.IsPersistent = true;
             Ped.BlockPermanentEvents = true;
             Ped.Tasks.Wander();
             Game.LogTrivial("Ped created");

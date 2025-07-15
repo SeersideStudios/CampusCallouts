@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using CalloutInterfaceAPI;
+using Rage.Native;
 
 
 namespace CampusCallouts.Callouts
@@ -45,7 +46,7 @@ namespace CampusCallouts.Callouts
 
 
 
-        private List<string> carList = new List<string>
+        private readonly List<string> carList = new List<string>
         {
             "sentinel2",
             "oracle2",
@@ -92,7 +93,7 @@ namespace CampusCallouts.Callouts
         {
             //Create Victim Ped
             Ped = new Ped(PedSpawn, PedHeading);
-            Ped.MakePersistent();
+            Ped.IsPersistent = true; // Make the Ped persistent so it doesn't despawn. More reliable // 
             Ped.BlockPermanentEvents = true;
             Game.LogTrivial("CampusCallouts - Hit and Run - Ped created");
 
@@ -191,7 +192,7 @@ namespace CampusCallouts.Callouts
                 if (!IsInDialogue)
                 {
                     Ped.Tasks.Clear();
-                    Ped.Face(Game.LocalPlayer.Character);
+                    NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Ped, Game.LocalPlayer.Character, -1); // Make the Ped look at the player. This is way better than using Ped.Face(); //
                     IsInDialogue = true;
                     DialogueStep = 0;
                 }
@@ -270,7 +271,7 @@ namespace CampusCallouts.Callouts
             {
                 // Notify to initiate Traffic Stop
                 Game.DisplayNotification("Suspect is cooperative, initiate a traffic stop and speak with them.");
-                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to speak with the driver.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey.ToString() + "~w~ to speak with the driver.");
                 Game.LogTrivial("CampusCallouts - Traffic stop triggered");
                 TrafficStopAuthorized = true;
             }
@@ -328,7 +329,7 @@ namespace CampusCallouts.Callouts
             {
                 End();
                 Game.LogTrivial("CampusCallouts - Hit and Run - Suspect or Car does not exist, ending callout.");
-                return;
+                return; // you don't necessarily need this, but it's a good safeguard
             }
 
 

@@ -4,6 +4,7 @@ using LSPD_First_Response.Mod.Callouts;
 using Rage;
 using System;
 using System.Drawing;
+using Rage.Native;
 
 namespace CampusCallouts.Callouts
 {
@@ -17,7 +18,7 @@ namespace CampusCallouts.Callouts
         private Vector3 PedSpawn;
         private float PedHeading;
 
-        private Random rand = new Random();
+        private readonly Random rand = new Random();
 
         private bool OnScene = false;
         private bool GatheredInfo = false;
@@ -61,7 +62,7 @@ namespace CampusCallouts.Callouts
             {
                 Ped.MakePersistent();
                 Ped.BlockPermanentEvents = true;
-                Ped.Face(Game.LocalPlayer.Character);
+                NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Ped, Game.LocalPlayer.Character, -1);
                 Ped.Tasks.Wander();
 
                 // Blip for location guidance
@@ -96,7 +97,7 @@ namespace CampusCallouts.Callouts
                 if (PedBlip.Exists()) PedBlip.DisableRoute();
                 if (Ped.Exists()) Ped.Tasks.StandStill(-1);
 
-                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey.ToString() + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout.ToString() + "~w~ to end the call.");
                 Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the trespasser.");
             }
 
@@ -105,7 +106,7 @@ namespace CampusCallouts.Callouts
             {
                 if (!IsInDialogue)
                 {
-                    if (Ped.Exists()) Ped.Face(Game.LocalPlayer.Character);
+                    if (Ped.Exists()) NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Ped, Game.LocalPlayer.Character, -1);
                     IsInDialogue = true;
                     DialogueStep = 0;
                 }

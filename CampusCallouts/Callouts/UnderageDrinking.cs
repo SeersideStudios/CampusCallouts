@@ -19,7 +19,7 @@ namespace CampusCallouts.Callouts
         private Ped Ped;
         private bool OnScene = false;
 
-        private List<Rage.Object> SpawnedProps = new List<Rage.Object>();
+        private readonly List<Rage.Object> SpawnedProps = new List<Rage.Object>();
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -53,7 +53,7 @@ namespace CampusCallouts.Callouts
         {
             //Create Ped
             Ped = new Ped(PedSpawn, PedHeading);
-            Ped.MakePersistent();
+            Ped.IsPersistent = true;
 
             //Set Ped Birthday
             DateTime PedBirthday = new DateTime(2005, 6, 15);
@@ -153,7 +153,7 @@ namespace CampusCallouts.Callouts
 
                
 
-                beer.MakePersistent();
+                beer.IsPersistent = true; // Make sure the beer bottle stays in the world
             }
             catch (Exception ex)
             {

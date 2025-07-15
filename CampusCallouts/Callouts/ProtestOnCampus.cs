@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using NAudio.Wave;
+using Rage.Native; // This is to use NativeFunction.Natives methods. You can put this in a Globals.cs file then all callouts will pick up in that .cs file
 
 namespace CampusCallouts.Callouts
 {
@@ -13,24 +14,26 @@ namespace CampusCallouts.Callouts
     public class ProtestOnCampus : Callout
     {
         // Ped management
-        private List<Ped> Protestors = new List<Ped>();
-        private List<Ped> Hostiles = new List<Ped>();
-        private Ped Teacher1;
-        private Ped Teacher2;
-        private Ped Dean;
+        private static readonly List<Ped> Protestors = new List<Ped>();
+        private static readonly List<Ped> Hostiles = new List<Ped>();
+        private static Ped Teacher1;
+        private static Ped Teacher2;
+        private static Ped Dean;
+
+        // Using the static modifier for the Ped Mamnagement for stability and to ensure that the same instances are used across the callout lifecycle.
 
         // Blips
-        private Blip DeanBlip;
-        private Blip routeBlip;
+        private static Blip DeanBlip;
+        private static Blip routeBlip;
 
         // Protest location data
-        private Vector3 ProtestLocation = new Vector3(-1650f, 215f, 60.5f);
-        private Vector3 DeanDestination = new Vector3(-1708.795f, 77.58182f, 65.76763f);
-        private Random rand = new Random();
-        private int scenarioOption;
-        private bool OnScene = false;
-        private int DialogueStep = 0;
-        private bool EscortStarted = false;
+        private static Vector3 ProtestLocation = new Vector3(-1650f, 215f, 60.5f);
+        private static Vector3 DeanDestination = new Vector3(-1708.795f, 77.58182f, 65.76763f);
+        private static readonly Random rand = new Random();
+        private static int scenarioOption;
+        private static bool OnScene = false;
+        private static int DialogueStep = 0;
+        private static bool EscortStarted = false;
 
         // Protestor model pool and positions
         private readonly List<string> protestorModels = new List<string> {
@@ -87,7 +90,7 @@ namespace CampusCallouts.Callouts
             for (int i = 0; i < 10; i++)
             {
                 Ped protestor = new Ped(protestorModels[rand.Next(protestorModels.Count)], protestorPositions[i], headings[i]);
-                protestor.MakePersistent();
+                protestor.IsPersistent = true; // This is more reliable than MakePersistent(); //
                 protestor.BlockPermanentEvents = true;
                 protestor.Tasks.PlayAnimation("missheistdockssetup1leadinoutig_1", "lsdh_ig_1_argue_les", 1f, AnimationFlags.Loop);
                 Protestors.Add(protestor);
@@ -113,9 +116,9 @@ namespace CampusCallouts.Callouts
             if (!OnScene && Dean.Exists() && Game.LocalPlayer.Character.Position.DistanceTo(Dean) < 30f)
             {
                 OnScene = true;
-                Dean.Face(Game.LocalPlayer.Character);
+                NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Dean, Game.LocalPlayer.Character, -1); // This is more reliable than using the Dean.Face(); // 
                 DeanBlip.DisableRoute();
-                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey.ToString() + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout.ToString() + "~w~ to end the call.");
 
                 if (System.IO.File.Exists(protestMusicPath))
                 {
@@ -190,10 +193,10 @@ namespace CampusCallouts.Callouts
         {
             switch (DialogueStep++)
             {
-                case 0: Game.DisplaySubtitle("~b~Dean: ~w~Thank you for coming, officer."); break;
-                case 1: Game.DisplaySubtitle("~g~You: ~w~What’s going on here?"); break;
-                case 2: Game.DisplaySubtitle("~b~Dean: ~w~It started as a peaceful protest, but we’re concerned about potential escalation."); break;
-                case 3: Game.DisplaySubtitle("~g~You: ~w~Understood. Let me assess the situation."); break;
+                case 0: Game.DisplaySubtitle("~b~Dean~w~: Thank you for coming, officer."); break;
+                case 1: Game.DisplaySubtitle("~g~You~w~: What’s going on here?"); break;
+                case 2: Game.DisplaySubtitle("~b~Dean~w~: It started as a peaceful protest, but we’re concerned about potential escalation."); break;
+                case 3: Game.DisplaySubtitle("~g~You~w~: Understood. Let me assess the situation."); break;
                 case 4: HandleScenario(); break;
             }
         }

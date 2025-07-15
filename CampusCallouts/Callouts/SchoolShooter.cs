@@ -20,7 +20,7 @@ namespace CampusCallouts.Callouts
             SpawnPoint = new Vector3(-1650f, 210f, 60.6f);
             CalloutPosition = SpawnPoint;
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 40f);
-            AddMinimumDistanceCheck(30f, CalloutPosition);
+            AddMinimumDistanceCheck(30f, CalloutPosition); // Be careful when using distance checks, they can make the callout instant Code 4. Just don't use MaximumDistanceCheck method. //
 
             CalloutMessage = "Active Shooter on Campus";
             CalloutAdvisory = "911 Caller reports gunfire on the ULSA campus.";
@@ -39,7 +39,7 @@ namespace CampusCallouts.Callouts
             // Spawn shooter
             Shooter = new Ped("S_M_Y_Marine_01", SpawnPoint, 180f);
             Shooter.RelationshipGroup = new RelationshipGroup("SHOOTER"); // Set early
-            Shooter.MakePersistent();
+            Shooter.IsPersistent = true; // IsPersistent ensures the ped doesn't despawn and it's way more reliable than using Shooter.MakePersistent(); //
             Shooter.BlockPermanentEvents = true;
             Shooter.KeepTasks = true;
 
@@ -72,7 +72,7 @@ namespace CampusCallouts.Callouts
             // Attach blip
             ShooterBlip = Shooter.AttachBlip();
             ShooterBlip.Color = Color.Red;
-            ShooterBlip.EnableRoute(Color.Red);
+            ShooterBlip.IsRouteEnabled = true; // This is way more reliable than using ShooterBlip.EnableRoute();
 
             Game.DisplayHelp("An armed suspect is reported to be opening fire on campus. Proceed Code 99.");
             Game.LogTrivial("CampusCallouts - SchoolShooter - Shooter spawned and armed.");
@@ -111,7 +111,7 @@ namespace CampusCallouts.Callouts
 
                 Game.LogTrivial("CampusCallouts - SchoolShooter - Shooter has engaged.");
                 if (ShooterBlip.Exists()) ShooterBlip.DisableRoute();
-                Game.DisplayHelp("Press " + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplayHelp("Press " + Settings.EndCallout.ToString() + "~w~ to end the call.");
             }
 
             if (!Shooter.Exists() || Shooter.IsDead || LSPD_First_Response.Mod.API.Functions.IsPedArrested(Shooter) || Game.IsKeyDown(Settings.EndCallout))

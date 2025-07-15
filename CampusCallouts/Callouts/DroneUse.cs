@@ -2,6 +2,7 @@
 using LSPD_First_Response.Mod.API;
 using LSPD_First_Response.Mod.Callouts;
 using Rage;
+using Rage.Native;
 using System;
 using System.Drawing;
 using System.IO;
@@ -17,7 +18,7 @@ namespace CampusCallouts.Callouts
         private Vector3 PedSpawn;
         private float PedHeading;
 
-        private Random rand = new Random();
+        private readonly Random rand = new Random();
 
         private Blip PedBlip;
 
@@ -66,7 +67,7 @@ namespace CampusCallouts.Callouts
 
             // Create Peds
             Ped = new Ped(PedSpawn, PedHeading);
-            Ped.MakePersistent();
+            Ped.IsPersistent = true; // Make the ped persistent so it doesn't despawn
             Ped.BlockPermanentEvents = true;
 
             //Play Animation
@@ -74,7 +75,7 @@ namespace CampusCallouts.Callouts
 
             //Spawn Drone
             Drone = new Rage.Object("xs_prop_arena_drone_01", Ped.GetOffsetPositionFront(1.5f));
-            Drone.MakePersistent();
+            Drone.IsPersistent = true; // Make the drone persistent so it doesn't despawn
 
             //Start hover Loop
             GameFiber.StartNew(delegate
@@ -139,7 +140,7 @@ namespace CampusCallouts.Callouts
             if (!GatheredInfo && OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Ped) <= 3f && !dialogueStarted)
             {
                 Ped.Tasks.Clear();
-                Ped.Face(Game.LocalPlayer.Character);
+                NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Ped, Game.LocalPlayer.Character, -1); // Make the ped look at the player
                 selectedDialogue = rand.Next(0, 2);
                 dialogueStarted = true;
 

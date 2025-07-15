@@ -4,6 +4,7 @@ using LSPD_First_Response.Mod.Callouts;
 using Rage;
 using System;
 using System.Drawing;
+using Rage.Native;
 
 namespace CampusCallouts.Callouts
 {
@@ -24,7 +25,7 @@ namespace CampusCallouts.Callouts
         private bool IsInDialogue = false;
 
         // --- Dialogue Handling ---
-        private Random rand = new Random();
+        private readonly Random rand = new Random();
         private int DialogueStep = 0;
         private int dialogueVariant = -1; // 0 = compliant, 1 = hostile
 
@@ -58,7 +59,7 @@ namespace CampusCallouts.Callouts
             Suspect = new Ped(SuspectSpawn, SuspectHeading);
             if (Suspect.Exists())
             {
-                Suspect.MakePersistent();
+                Suspect.IsPersistent = true;
                 Suspect.BlockPermanentEvents = true;
 
                 // Give suspect a weapon (bat)
@@ -92,7 +93,7 @@ namespace CampusCallouts.Callouts
             if (!OnScene && Game.LocalPlayer.Character.Position.DistanceTo(Suspect) <= 10f)
             {
                 OnScene = true;
-                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout + "~w~ to end the call.");
+                Game.DisplayHelp("Press ~y~" + Settings.DialogueKey.ToString() + "~w~ to advance dialogue. Press ~y~" + Settings.EndCallout.ToString() + "~w~ to end the call.");
                 Game.DisplaySubtitle("~y~[INFO]~w~ Speak to the suspect to gather information.");
             }
 
@@ -102,7 +103,7 @@ namespace CampusCallouts.Callouts
                 if (!IsInDialogue)
                 {
                     Suspect.Tasks.Clear();
-                    Suspect.Face(Game.LocalPlayer.Character);
+                    NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Suspect, Game.LocalPlayer.Character, -1);
                     IsInDialogue = true;
                     DialogueStep = 0;
                     dialogueVariant = rand.Next(0, 2);
