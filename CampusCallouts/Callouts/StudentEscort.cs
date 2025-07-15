@@ -3,6 +3,7 @@ using Rage;
 using LSPD_First_Response.Mod.Callouts;
 using LSPD_First_Response.Mod.API;
 using CalloutInterfaceAPI;
+using Rage.Native;
 
 namespace CampusCallouts.Callouts
 {
@@ -12,8 +13,8 @@ namespace CampusCallouts.Callouts
         private Vector3 CarSpawn = new Vector3(-1685.103f, 78.41851f, 63.9855f);
         private Vector3 PedSpawn = new Vector3(-1684.251f, 77.36402f, 64.39139f);
         private Vector3 Destination = new Vector3(-1671.686f, 174.0843f, 61.75573f);
-        private float CarHeading = 112.0373f;
-        private float PedHeading = 111.9856f;
+        private readonly float CarHeading = 112.0373f;
+        private readonly float PedHeading = 111.9856f;
 
         private Ped Ped;
         private Vehicle Car;
@@ -76,7 +77,7 @@ namespace CampusCallouts.Callouts
                 {
                     Ped.Tasks.LeaveVehicle(Car, LeaveVehicleFlags.None);
                     Ped.Tasks.StandStill(-1);
-                    Ped.Face(Game.LocalPlayer.Character);
+                    NativeFunction.Natives.TASK_LOOK_AT_ENTITY(Ped, Game.LocalPlayer.Character, -1);
                 }
 
                 GameFiber.StartNew(() =>
