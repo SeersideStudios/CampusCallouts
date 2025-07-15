@@ -24,5 +24,5 @@ using System.Runtime.InteropServices;
 
 // 0.5.0 is a pre-release dev version
 // 1.0.0 is the initial release
-[assembly: AssemblyVersion("1.0.1")]
-[assembly: AssemblyFileVersion("1.0.1")]
+[assembly: AssemblyVersion("1.0.2")]
+[assembly: AssemblyFileVersion("1.0.2")]

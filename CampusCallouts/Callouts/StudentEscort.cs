@@ -53,7 +53,7 @@ namespace CampusCallouts.Callouts
                 Ped.BlockPermanentEvents = true;
                 Ped.Tasks.EnterVehicle(Car, -1);
                 PedBlip = Ped.AttachBlip();
-                PedBlip.Color = Color.Blue;
+                PedBlip.Color = Color.Orange;
                 PedBlip.EnableRoute(Color.Orange);
             }
 

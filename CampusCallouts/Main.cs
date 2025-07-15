@@ -12,7 +12,7 @@ namespace CampusCallouts
     public class Main : Plugin
     {
         public static Version LatestVersion = new Version();
-        public static Version UserVersion = new Version("1.0.1");
+        public static Version UserVersion = new Version("1.0.2");
         public static bool UpToDate;
         public static bool CalloutInterface;
         public static bool Beta = false;
@@ -43,7 +43,7 @@ namespace CampusCallouts
                     int num = (int)Game.DisplayNotification("3dtextures", "mpgroundlogo_cops", "Campus Callouts", "~y~v." + UserVersion + " ~b~by Seerside Studios", " ~g~Loaded Successfully. ~b~Have a good day at School!");
                     GameFiber.StartNew(delegate
                     {
-                        Game.LogTrivial("CampusCallouts: Player Went on Duty. Checking for Updates.");
+                        Game.LogTrivial("CampusCallouts: Plugin initialized, checking for updates.");
                         try
                         {
                             Thread FetchVersionThread = new Thread(() =>
@@ -69,7 +69,7 @@ namespace CampusCallouts
                                 // compare the versions  
                                 if (UserVersion.CompareTo(LatestVersion) < 0)
                                 {
-                                    Game.LogTrivial("CampusCallouts: Finished Checking Campus Callouts for Updates.");
+                                    Game.LogTrivial("CampusCallouts: Completed update check.");
                                     Game.LogTrivial("CampusCallouts: Update Available for Campus Callouts. Installed Version " + UserVersion + " ,New Version " + LatestVersion);
                                     Game.DisplayNotification("~r~IMPORTANT:~w~ A new version of ~b~CampusCallouts~w~ is available.\n\n~y~Installed:~w~ v" + UserVersion + "\n~y~Latest:~w~ v" + LatestVersion + "\n\n~r~Please update to ensure optimal performance and prevent issues.");
                                     Game.LogTrivial("====================CAMPUSCALLOUTS WARNING====================");
@@ -86,9 +86,9 @@ namespace CampusCallouts
                                 }
                                 else
                                 {
-                                    Game.LogTrivial("CampusCallouts: Finished Checking Campus Callouts for Updates.");
+                                    Game.LogTrivial("CampusCallouts: Completed update check.");
                                     Game.DisplayNotification("You are on the ~g~Latest Version~w~ of ~b~CampusCallouts.");
-                                    Game.LogTrivial("CampusCallouts: Campus Callouts is Up to Date.");
+                                    Game.LogTrivial("CampusCallouts: Latest version is downloaded!");
                                     UpToDate = true;
                                 }
                             }
@@ -109,6 +109,22 @@ namespace CampusCallouts
         private static void RegisterCallouts()
         {
             Game.LogTrivial("====================CAMPUSCALLOUTS CALLOUTS REGISTRATION====================");
+
+            // Check for required DLLs
+            string gtaFolder = System.IO.Directory.GetCurrentDirectory(); 
+            string calloutInterfacePath = System.IO.Path.Combine(gtaFolder, "CalloutInterfaceAPI.dll");
+            string naudioPath = System.IO.Path.Combine(gtaFolder, "NAudio.dll");
+
+            if (System.IO.File.Exists(calloutInterfacePath))
+                Game.LogTrivial("CampusCallouts: CalloutInterfaceAPI.dll found in main directory.");
+            else
+                Game.LogTrivial("CampusCallouts: CalloutInterfaceAPI.dll NOT found in main directory.");
+
+            if (System.IO.File.Exists(naudioPath))
+                Game.LogTrivial("CampusCallouts: NAudio.dll found in main directory.");
+            else
+                Game.LogTrivial("CampusCallouts: NAudio.dll NOT found in main directory.");
+
             //CalloutInterface integration
             if (Functions.GetAllUserPlugins().ToList().Any(a => a != null && a.FullName.Contains("CalloutInterface")) == true)
             {
@@ -122,7 +138,7 @@ namespace CampusCallouts
             }
 
             //Check for INI file
-            if (Settings.ini.Exists()) { Game.LogTrivial("CampusCallout.ini is installed."); }
+            if (Settings.ini.Exists()) { Game.LogTrivial("CampusCallouts.ini is installed."); }
             else { Game.LogTrivial("CampusCallouts.ini is NOT installed"); }
 
             //Checks for BluelineAudio Preference
