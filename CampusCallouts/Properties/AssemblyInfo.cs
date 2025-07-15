@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("CampusCallouts")]
-[assembly: AssemblyDescription("University Callouts ReMake for LSPDFR")]
+[assembly: AssemblyDescription("A remake of the University Callouts plugin")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Seerside Studios")]
 [assembly: AssemblyProduct("CampusCallouts")]
-[assembly: AssemblyCopyright("Copyright ©  2025 Seerside Studios")]
+[assembly: AssemblyCopyright("Copyright © 2025 Seerside Studios")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
