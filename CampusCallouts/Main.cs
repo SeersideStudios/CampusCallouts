@@ -6,7 +6,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 
-[assembly: Rage.Attributes.Plugin("CampusCallouts", Description = "University Callouts ReMake for LSPDFR 0.4.9", Author = "Seerside Studios")] //Is this really needed?
+[assembly: Rage.Attributes.Plugin("CampusCallouts", Description = "University Callouts ReMake for LSPDFR 0.4.9", Author = "Seerside Studios")]
 namespace CampusCallouts
 {
     public class Main : Plugin
