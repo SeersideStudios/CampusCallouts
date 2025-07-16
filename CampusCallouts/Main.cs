@@ -12,7 +12,7 @@ namespace CampusCallouts
     public class Main : Plugin
     {
         public static Version LatestVersion = new Version();
-        public static Version UserVersion = new Version("1.0.2");
+        public static Version UserVersion = new Version("1.0.3");
         public static bool UpToDate;
         public static bool CalloutInterface;
         public static bool Beta = false;
